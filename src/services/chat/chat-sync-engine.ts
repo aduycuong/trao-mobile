@@ -37,8 +37,7 @@ type ChatSyncEngineOptions = {
 };
 
 /**
- * Keeps the local store in step with the server (see spacekids-app docs/chat/chat-design.md
- * sections 6–8). Framework independent: it only needs a `ChatLocalStore` and a
+ * Keeps the local store in step with the server. Framework independent: it only needs a `ChatLocalStore` and a
  * `ChatApi`, so it matches the web client (Dexie there, expo-sqlite here).
  *
  * - `start()` loads a snapshot (`getDialogs`) on first run, then follows the
