@@ -1,10 +1,17 @@
 /** @type {import('tailwindcss').Config} */
-// Neutral base: Trao's design tokens (colors, fonts, radii) are added with the UI work.
 module.exports = {
   content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
-    extend: {},
+    extend: {
+      // Be Vietnam Pro is loaded per weight in the root layout.
+      fontFamily: {
+        vn: ['BeVietnamPro_400Regular'],
+        'vn-medium': ['BeVietnamPro_500Medium'],
+        'vn-semibold': ['BeVietnamPro_600SemiBold'],
+        'vn-bold': ['BeVietnamPro_700Bold'],
+      },
+    },
   },
   plugins: [],
 };

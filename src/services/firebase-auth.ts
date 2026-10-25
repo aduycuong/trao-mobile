@@ -1,11 +1,15 @@
 import {
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   signInWithCustomToken as firebaseSignInWithCustomToken,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   updatePassword,
   updateProfile,
+  verifyPasswordResetCode,
   type Auth,
   type User,
 } from 'firebase/auth';
@@ -14,6 +18,8 @@ import { getFirebaseAuth } from './firebase';
 const errorMessages: Record<string, string> = {
   'auth/custom-token-mismatch': 'Phiên đăng nhập không hợp lệ. Vui lòng thử lại.',
   'auth/email-already-in-use': 'Email này đã được sử dụng.',
+  'auth/expired-action-code': 'Link không còn dùng được. Hãy yêu cầu link mới.',
+  'auth/invalid-action-code': 'Link không còn dùng được. Hãy yêu cầu link mới.',
   'auth/invalid-credential': 'Email hoặc mật khẩu chưa đúng.',
   'auth/invalid-custom-token': 'Phiên đăng nhập không hợp lệ. Vui lòng thử lại.',
   'auth/invalid-email': 'Email chưa đúng định dạng.',
@@ -122,4 +128,26 @@ export async function changeAccountPassword(currentPassword: string, newPassword
     return withAuthErrors(() => Promise.reject(error));
   }
   await withAuthErrors(() => updatePassword(user, newPassword));
+}
+
+export async function sendPasswordReset(email: string) {
+  const auth = requireAuth();
+  await withAuthErrors(() => sendPasswordResetEmail(auth, email.trim().toLowerCase()));
+}
+
+export async function sendVerificationEmail() {
+  const user = requireAuth().currentUser;
+  if (!user) throw new Error('Bạn cần đăng nhập để tiếp tục.');
+  await withAuthErrors(() => sendEmailVerification(user));
+}
+
+/** Returns the email the reset link was issued for. */
+export async function verifyResetCode(oobCode: string): Promise<string> {
+  const auth = requireAuth();
+  return withAuthErrors(() => verifyPasswordResetCode(auth, oobCode));
+}
+
+export async function confirmReset(oobCode: string, newPassword: string) {
+  const auth = requireAuth();
+  await withAuthErrors(() => confirmPasswordReset(auth, oobCode, newPassword));
 }
