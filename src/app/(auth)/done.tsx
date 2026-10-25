@@ -26,8 +26,10 @@ export default function DoneScreen() {
   const copy = COPY[kind === 'password-reset' ? 'password-reset' : 'welcome'];
   const reset = kind === 'password-reset';
 
-  // Region and interest picking is a separate flow that is not built yet, so both go home.
-  const primary = () => router.replace(reset ? '/login' : '/');
+  const primary = () =>
+    reset
+      ? router.replace('/login')
+      : router.replace({ pathname: '/start', params: { step: 'location' } });
 
   return (
     <AuthScroll>

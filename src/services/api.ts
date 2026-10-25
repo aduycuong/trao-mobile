@@ -44,8 +44,7 @@ export async function apiRequest<T>(
   }
 
   const data = (await response.json().catch(() => null)) as
-    | (T & { error?: string; message?: string })
-    | null;
+    (T & { error?: string; message?: string }) | null;
 
   if (!response.ok) {
     throw new ApiError(

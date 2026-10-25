@@ -4,9 +4,7 @@ import { ApiError, apiRequest } from '@/services/api';
 import { getNotifications } from './notifications';
 
 /** Matches `PUSH_CHANNELS` on the backend; a push for a missing channel is not shown. */
-const CHANNELS = [
-  { id: 'chat', name: 'Tin nhắn', importance: 'HIGH' },
-] as const;
+const CHANNELS = [{ id: 'chat', name: 'Tin nhắn', importance: 'HIGH' }] as const;
 
 /** Token this device registered in the current session, so sign-out can remove it. */
 let registeredToken: string | null = null;
