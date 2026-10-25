@@ -22,6 +22,7 @@ export default function RootLayout() {
   return (
     <AppProviders>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="auth-gate" options={{ presentation: 'modal' }} />
       </Stack>
     </AppProviders>

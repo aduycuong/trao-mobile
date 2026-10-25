@@ -40,10 +40,20 @@ export type CatIconKind =
   | 'listings'
   | 'me';
 
-type CatIconProps = { kind: CatIconKind; size?: number };
+// Same palette through the canvas `grayscale(1)` filter, for inactive tabs.
+const GRAY = {
+  y: '#C3C3C3',
+  yl: '#DBDBDB',
+  yd: '#A4A4A4',
+  b: '#636363',
+  bl: '#A0A0A0',
+  bd: '#3F3F3F',
+} as const;
 
-export function CatIcon({ kind, size = 40 }: CatIconProps) {
-  const c = C;
+type CatIconProps = { kind: CatIconKind; size?: number; grayscale?: boolean };
+
+export function CatIcon({ kind, size = 40, grayscale }: CatIconProps) {
+  const c = grayscale ? GRAY : C;
   switch (kind) {
     case 'sale':
       return (
