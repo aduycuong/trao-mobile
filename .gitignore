@@ -74,4 +74,5 @@ expo-env.d.ts
 .local
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/rules/
