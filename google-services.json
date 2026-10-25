@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "349717388405",
+    "firebase_url": "https://trao-c83b2-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "trao-c83b2",
+    "storage_bucket": "trao-c83b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349717388405:android:94266f48e5c8da6913ec3c",
+        "android_client_info": {
+          "package_name": "app.trao.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "349717388405-soih4unmclu1h6qbl1db0o47vjuh9ddu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByAHx2CBH1vkJ8ZfTOEwBhWf-z0SecegI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "349717388405-soih4unmclu1h6qbl1db0o47vjuh9ddu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
