@@ -63,6 +63,12 @@
           "microphonePermission": false
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Để hiện đồ gần bạn và tính khoảng cách."
+        }
+      ],
       "expo-font"
     ],
     "extra": {

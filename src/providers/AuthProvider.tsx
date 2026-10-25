@@ -219,7 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Presence rules need the user's auth, so write "offline" before the SDK signs out.
     if (current) await markPresenceOffline(current.uid);
     // Needs the idToken, so drop this device's push token before the SDK signs out.
-    const idToken = await getFirebaseAuth()?.currentUser?.getIdToken().catch(() => null);
+    const idToken = await getFirebaseAuth()
+      ?.currentUser?.getIdToken()
+      .catch(() => null);
     if (idToken) await unregisterDeviceForPush(idToken);
     await clearCachedProfile();
     await signOutFirebase();

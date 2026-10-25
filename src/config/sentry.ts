@@ -2,8 +2,7 @@ import * as Sentry from '@sentry/react-native';
 
 const PLACEHOLDER_DSN = 'PLACEHOLDER_SENTRY_DSN';
 
-const getSentryDsn = () =>
-  process.env.EXPO_PUBLIC_SENTRY_DSN ?? process.env.SENTRY_DSN;
+const getSentryDsn = () => process.env.EXPO_PUBLIC_SENTRY_DSN ?? process.env.SENTRY_DSN;
 
 export const initSentry = () => {
   const dsn = getSentryDsn();
