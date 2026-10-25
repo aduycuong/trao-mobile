@@ -45,7 +45,7 @@ export const CHAT_REACTIONS = [
   { emoji: '👍', label: 'Thích' },
 ] as const;
 
-/** Media messages (images only in v1). See spacekids-app docs/chat/media.md. */
+/** Media messages (images only in v1). */
 export const CHAT_MEDIA_MAX_FILES = 10;
 /** The (already compressed) full image of an attachment. */
 export const CHAT_MEDIA_IMAGE_MAX_BYTES = 5 * 1024 * 1024;

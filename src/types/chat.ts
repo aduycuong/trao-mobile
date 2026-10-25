@@ -131,7 +131,7 @@ export type GetDifferenceResult = {
 };
 export type SendMessageResult = { message: ChatMessage };
 
-/** A sticker of the chat catalog (spacekids-app `StickerListItem`). */
+/** A sticker of the chat catalog. */
 export type ChatStickerItem = ChatMessageSticker & { description: string };
 export type ChatStickerGroup = { id: string; name: string };
 export type ListChatStickersResult = {
