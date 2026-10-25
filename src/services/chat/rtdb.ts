@@ -11,6 +11,7 @@ import {
   type Database,
 } from 'firebase/database';
 import { getFirebaseApp, isRtdbConfigured } from '@/services/firebase';
+import type { PhoneVerifiedSignal } from '@/types/profile';
 import { CHAT_PRESENCE_PATH, CHAT_SYNC_PATH, CHAT_TYPING_PATH } from './constants';
 
 /**
@@ -154,5 +155,35 @@ export function subscribeChatTyping(
       onChange({ ...lastSeen });
     },
     () => onChange({})
+  );
+}
+
+/** Doorbell for phone verification: the server writes the last verified number (masked) here. */
+export const PHONE_VERIFICATION_SIGNAL_PATH = 'phone-verification';
+
+export function subscribePhoneVerifiedSignal(
+  firebaseUid: string,
+  onSignal: (signal: PhoneVerifiedSignal) => void
+) {
+  const db = getDb();
+  if (!db) return null;
+  return onValue(
+    ref(db, `${PHONE_VERIFICATION_SIGNAL_PATH}/${firebaseUid}`),
+    (snapshot) => {
+      const value = snapshot.val() as Partial<PhoneVerifiedSignal> | null;
+      if (
+        value &&
+        typeof value.verifiedAt === 'number' &&
+        typeof value.maskedPhone === 'string' &&
+        typeof value.rewardAmount === 'number'
+      ) {
+        onSignal({
+          verifiedAt: value.verifiedAt,
+          maskedPhone: value.maskedPhone,
+          rewardAmount: value.rewardAmount,
+        });
+      }
+    },
+    (error) => console.warn('[phone-verification] signal error', error)
   );
 }
