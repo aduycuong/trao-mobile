@@ -23,8 +23,7 @@ type ListingCardProps = {
 
 /**
  * Listing card (canvas ItemCard): cover, form badge, price or what the owner wants, condition and
- * place, and the save heart on the cover. The listing page is a later part of the plan, so the
- * card itself opens nothing yet.
+ * place, and the save heart on the cover. Tapping the card opens the listing page.
  */
 export function ListingCard({ listing, now }: ListingCardProps) {
   const router = useRouter();
@@ -64,9 +63,13 @@ export function ListingCard({ listing, now }: ListingCardProps) {
   }
 
   return (
-    <View className="gap-2">
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={listing.title}
+      onPress={() => router.push({ pathname: '/l/[id]', params: { id: listing.id } })}
+      className="gap-2"
+    >
       <View
-        accessibilityLabel={listing.title}
         className="aspect-[4/5] items-center justify-center overflow-hidden rounded-2xl"
         style={{ backgroundColor: FALLBACK_TONE }}
       >
@@ -301,6 +304,6 @@ export function ListingCard({ listing, now }: ListingCardProps) {
           </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
