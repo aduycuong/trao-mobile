@@ -22,6 +22,12 @@ import {
 } from '@/services/avatar-upload';
 import { getFirebaseAuth } from '@/services/firebase';
 import { sendVerificationEmail } from '@/services/firebase-auth';
+import {
+  linkSocialProvider,
+  SOCIAL_PROVIDER_NAMES,
+  unlinkSocialProvider,
+  type SocialProvider,
+} from '@/services/social-auth';
 import { MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 
 type TagTone = 'ok' | 'need' | 'plain';
@@ -115,6 +121,8 @@ export default function AccountScreen() {
   const [askDelete, setAskDelete] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [linking, setLinking] = useState<SocialProvider | null>(null);
+  const [askUnlink, setAskUnlink] = useState<SocialProvider | null>(null);
 
   const {
     data: account,
@@ -194,18 +202,48 @@ export default function AccountScreen() {
   }
 
   function openPassword() {
-    if (!canChangePassword) {
-      Alert.alert(
-        'Đặt mật khẩu',
-        'Tài khoản này đăng nhập bằng Google hoặc Facebook. Đặt mật khẩu sẽ có trong bản sau.'
-      );
-      return;
-    }
     router.push('/account/password');
   }
 
-  function socialSoon(name: string) {
-    Alert.alert(name, `Liên kết ${name} sẽ có trong bản sau.`);
+  async function afterProviderChange() {
+    // Re-reads the Firebase user so the rows below show the new sign-in methods.
+    await refreshProfile();
+    await queryClient.invalidateQueries({ queryKey: MY_ACCOUNT_QUERY_KEY });
+  }
+
+  async function toggleProvider(provider: SocialProvider) {
+    if (linking) return;
+    const linked = provider === 'google' ? google : facebook;
+    if (linked) {
+      setAskUnlink(provider);
+      return;
+    }
+    setLinking(provider);
+    try {
+      if (await linkSocialProvider(provider)) {
+        await afterProviderChange();
+        Alert.alert(`Đã liên kết ${SOCIAL_PROVIDER_NAMES[provider]}.`);
+      }
+    } catch (caught) {
+      Alert.alert('Không liên kết được', caught instanceof Error ? caught.message : 'Thử lại sau.');
+    } finally {
+      setLinking(null);
+    }
+  }
+
+  async function unlinkProvider(provider: SocialProvider) {
+    try {
+      await unlinkSocialProvider(provider);
+      await afterProviderChange();
+      Alert.alert(`Đã bỏ liên kết ${SOCIAL_PROVIDER_NAMES[provider]}.`);
+    } catch (caught) {
+      Alert.alert(
+        'Không bỏ liên kết được',
+        caught instanceof Error ? caught.message : 'Thử lại sau.'
+      );
+    } finally {
+      setAskUnlink(null);
+    }
   }
 
   async function removeAccount() {
@@ -367,17 +405,29 @@ export default function AccountScreen() {
               />
               <Row
                 label="Google"
-                value={google ? (google.email ?? 'Đã liên kết') : 'Chưa liên kết'}
+                value={
+                  linking === 'google'
+                    ? 'Đang liên kết…'
+                    : google
+                      ? (google.email ?? 'Đã liên kết')
+                      : 'Chưa liên kết'
+                }
                 muted={!google}
                 tag={google ? OK_TAG('Đã liên kết') : undefined}
-                onPress={() => socialSoon('Google')}
+                onPress={() => void toggleProvider('google')}
               />
               <Row
                 label="Facebook"
-                value={facebook ? (facebook.email ?? 'Đã liên kết') : 'Chưa liên kết'}
+                value={
+                  linking === 'facebook'
+                    ? 'Đang liên kết…'
+                    : facebook
+                      ? (facebook.email ?? 'Đã liên kết')
+                      : 'Chưa liên kết'
+                }
                 muted={!facebook}
                 tag={facebook ? OK_TAG('Đã liên kết') : undefined}
-                onPress={() => socialSoon('Facebook')}
+                onPress={() => void toggleProvider('facebook')}
               />
             </Group>
 
@@ -400,6 +450,16 @@ export default function AccountScreen() {
         ) : null}
       </ScrollView>
 
+      {askUnlink ? (
+        <ConfirmSheet
+          title={`Bỏ liên kết ${SOCIAL_PROVIDER_NAMES[askUnlink]}?`}
+          description="Bạn không đăng nhập bằng cách này được nữa. Cần còn ít nhất một cách đăng nhập khác."
+          confirmLabel="Bỏ liên kết"
+          destructive
+          onConfirm={() => unlinkProvider(askUnlink)}
+          onCancel={() => setAskUnlink(null)}
+        />
+      ) : null}
       {askDelete ? (
         <ConfirmSheet
           title="Xoá tài khoản?"

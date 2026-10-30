@@ -101,7 +101,7 @@ export default function LoginScreen() {
         </View>
         <AuthButton label="Đăng nhập" onPress={submit} loading={loading} />
         <Divider label="hoặc" />
-        <SocialButtons />
+        <SocialButtons disabled={loading} onSignedIn={() => router.replace('/')} />
         <View className="flex-row items-center justify-center gap-1">
           <AppText className="text-[14px] text-[#33414D]">Chưa có tài khoản?</AppText>
           <TextLink label="Đăng ký" onPress={() => router.replace('/register')} />

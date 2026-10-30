@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithCustomToken as firebaseSignInWithCustomToken,
   EmailAuthProvider,
+  linkWithCredential,
   reauthenticateWithCredential,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -128,6 +129,20 @@ export async function changeAccountPassword(currentPassword: string, newPassword
     return withAuthErrors(() => Promise.reject(error));
   }
   await withAuthErrors(() => updatePassword(user, newPassword));
+}
+
+/** Adds an email + password login to an account that only signs in with Google or Facebook. */
+export async function setAccountPassword(newPassword: string) {
+  const user = requireAuth().currentUser;
+  if (!user?.email) throw new Error('Bạn cần đăng nhập lại.');
+  try {
+    await linkWithCredential(user, EmailAuthProvider.credential(user.email, newPassword));
+  } catch (error) {
+    if ((error as { code?: unknown } | null)?.code === 'auth/requires-recent-login')
+      throw new Error('Để bảo mật, hãy đăng xuất rồi đăng nhập lại trước khi đặt mật khẩu.');
+    return withAuthErrors(() => Promise.reject(error));
+  }
+  await user.reload();
 }
 
 export async function sendPasswordReset(email: string) {

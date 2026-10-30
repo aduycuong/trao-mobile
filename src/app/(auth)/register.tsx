@@ -164,7 +164,7 @@ export default function RegisterScreen() {
         {error ? <AuthError>{error}</AuthError> : null}
         <AuthButton label="Tạo tài khoản" onPress={submit} loading={loading} />
         <Divider label="hoặc đăng ký nhanh với" />
-        <SocialButtons />
+        <SocialButtons disabled={loading} onSignedIn={() => router.replace('/')} />
         <View className="flex-row items-center justify-center gap-1">
           <AppText className="text-[14px] text-[#33414D]">Đã có tài khoản?</AppText>
           <TextLink label="Đăng nhập" onPress={() => router.replace('/login')} />

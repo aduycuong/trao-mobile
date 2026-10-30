@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   TextInput,
   View,
@@ -10,6 +9,8 @@ import {
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { AppText } from '@/components/ui/app-text';
+import { useAuth } from '@/hooks/useAuth';
+import type { SocialProvider } from '@/services/social-auth';
 
 type AuthFieldProps = {
   label: string;
@@ -251,10 +252,34 @@ function FacebookMark() {
   );
 }
 
-/** Google/Facebook need native sign-in SDKs that are not wired yet, so tapping says so. */
-export function SocialButtons() {
-  const soon = (name: string) => () =>
-    Alert.alert(name, `Đăng nhập bằng ${name} sẽ có trong bản sau. Hãy dùng email nhé.`);
+/**
+ * "Tiếp tục với Google / Facebook". `onSignedIn` runs once the session is set; a new user
+ * without an area is then sent through onboarding by the same gate as an email sign-in.
+ */
+export function SocialButtons({
+  onSignedIn,
+  disabled,
+}: {
+  onSignedIn: () => void;
+  disabled?: boolean;
+}) {
+  const { signInWithSocial } = useAuth();
+  const [pending, setPending] = useState<SocialProvider | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function signIn(provider: SocialProvider) {
+    setError(null);
+    setPending(provider);
+    try {
+      if (await signInWithSocial(provider)) onSignedIn();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Không đăng nhập được. Thử lại sau.');
+    } finally {
+      setPending(null);
+    }
+  }
+
+  const busy = pending !== null || !!disabled;
 
   return (
     <View className="gap-2.5">
@@ -262,14 +287,19 @@ export function SocialButtons() {
         variant="outline"
         label="Tiếp tục với Google"
         icon={<GoogleMark />}
-        onPress={soon('Google')}
+        loading={pending === 'google'}
+        disabled={busy}
+        onPress={() => void signIn('google')}
       />
       <AuthButton
         variant="outline"
         label="Tiếp tục với Facebook"
         icon={<FacebookMark />}
-        onPress={soon('Facebook')}
+        loading={pending === 'facebook'}
+        disabled={busy}
+        onPress={() => void signIn('facebook')}
       />
+      {error ? <AuthError>{error}</AuthError> : null}
     </View>
   );
 }
