@@ -61,6 +61,23 @@ export function validateResetPassword(password: string, confirmPassword: string)
   return errors;
 }
 
+/** Same rules as the web `changePasswordFormSchema`. */
+export function validateChangePassword(
+  currentPassword: string,
+  password: string,
+  confirmPassword: string
+): AuthFieldErrors & { currentPassword?: string } {
+  const errors: AuthFieldErrors & { currentPassword?: string } = {};
+  if (!currentPassword) errors.currentPassword = 'Nhập mật khẩu hiện tại.';
+  const passwordError = validateNewPassword(password);
+  if (passwordError) errors.password = passwordError;
+  else if (password === currentPassword)
+    errors.password = 'Mật khẩu mới cần khác mật khẩu hiện tại.';
+  if (!confirmPassword) errors.confirmPassword = 'Nhập lại mật khẩu mới.';
+  else if (confirmPassword !== password) errors.confirmPassword = 'Hai mật khẩu chưa giống nhau.';
+  return errors;
+}
+
 export type PasswordStrength = {
   /** 0 = empty, 1 = weak, 2 = fair, 3 = strong. */
   level: 0 | 1 | 2 | 3;

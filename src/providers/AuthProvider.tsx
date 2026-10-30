@@ -51,6 +51,11 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
   /** Changes the signed-in user's name and/or photo; omitted fields stay as they are. */
   updateProfile: (changes: { displayName?: string; avatarUrl?: string | null }) => Promise<void>;
+  /**
+   * Reloads the Firebase user and the profile after the backend changed the name or photo
+   * (`PATCH /api/me/account`); the renewed token stops the next sync writing the old values back.
+   */
+  refreshProfile: () => Promise<void>;
   /** False for accounts without an email + password login. */
   canChangePassword: boolean;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -251,6 +256,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [applyProfile, getIdToken, syncProfile]
   );
 
+  const refreshProfile = useCallback(async () => {
+    const user = getFirebaseAuth()?.currentUser;
+    if (!user) return;
+    await user.getIdToken(true);
+    await user.reload();
+    await syncProfile(user);
+  }, [syncProfile]);
+
   const changePassword = useCallback(
     (currentPassword: string, newPassword: string) =>
       changeAccountPassword(currentPassword, newPassword),
@@ -265,6 +278,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       changePassword,
       getIdToken,
       profileError,
+      refreshProfile,
       register,
       retryProfile,
       session,
@@ -278,6 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       getIdToken,
       passwordLogin,
       profileError,
+      refreshProfile,
       register,
       retryProfile,
       session,
