@@ -243,3 +243,21 @@ export type UserEventKind = 'deals' | 'notifications';
 export function subscribeUserEvent(firebaseUid: string, kind: UserEventKind, onRing: () => void) {
   return subscribeDoorbell(`${USER_EVENT_PATH}/${firebaseUid}/${kind}`, 'user-events', onRing);
 }
+
+/**
+ * Doorbell of the check of the user's items (`item-media/{firebaseUid}`): the server writes the
+ * last change when a file of one of the items finishes its check. Unlike the other doorbells the
+ * callback also runs right after subscribing, in case the change came before the listener was
+ * ready.
+ */
+export const ITEM_MEDIA_SIGNAL_PATH = 'item-media';
+
+export function subscribeItemMediaSignal(firebaseUid: string, onRing: () => void) {
+  const db = getDb();
+  if (!db) return null;
+  return onValue(
+    ref(db, `${ITEM_MEDIA_SIGNAL_PATH}/${firebaseUid}`),
+    () => onRing(),
+    (error) => console.warn('[items] item media signal error', error)
+  );
+}

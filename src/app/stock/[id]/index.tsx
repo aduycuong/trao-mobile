@@ -23,6 +23,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { fetchDeals } from '@/services/deals/deals-api';
 import { useGoBack } from '@/hooks/useGoBack';
+import { useItemMediaSignal } from '@/hooks/useItemMediaSignal';
 import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import {
   deleteMyItem,
@@ -96,8 +97,13 @@ function StockItemContent() {
     queryKey,
     queryFn: async () => fetchMyItem(await getIdToken(), id),
     enabled: !!session,
-    // Photos and videos are checked after the item is saved: look again until that is done.
-    refetchInterval: (query) => (query.state.data?.mediaStatus === 'checking' ? 5000 : false),
+    // The doorbell below says when to look again; this only covers RTDB being unavailable.
+    refetchInterval: (query) => (query.state.data?.mediaStatus === 'checking' ? 30000 : false),
+  });
+  // Photos and videos are checked after the item is saved: look again when that is done.
+  useItemMediaSignal(item?.mediaStatus === 'checking', () => {
+    void queryClient.invalidateQueries({ queryKey });
+    void queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY });
   });
 
   // Who the item is in a deal with ("Đang giao dịch · với …"): the deal in progress on one of its listings.
