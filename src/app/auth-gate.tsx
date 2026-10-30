@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { TraoLogo } from '@/components/auth/trao-logo';
@@ -24,8 +24,12 @@ export default function AuthGateScreen() {
     else router.replace('/');
   }
 
+  // On iOS the modal is a sheet that already starts below the status bar, so the top inset
+  // would only add a gap; on Android it is full screen.
+  const paddingTop = Platform.OS === 'ios' ? 0 : insets.top;
+
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-white" style={{ paddingTop }}>
       <View className="h-14 flex-row items-center px-2">
         <Pressable
           accessibilityRole="button"
