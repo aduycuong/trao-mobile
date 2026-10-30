@@ -70,9 +70,15 @@ async function prepareAvatar(uri: string): Promise<{ uri: string; size: number }
 
 type UploadUrlResult = { uploadUrl: string; key: string; publicUrl: string | null };
 
-/** Uploads a picked photo as an avatar and returns its public URL; preset URLs pass through. */
-export async function uploadAvatar(token: string, uri: string): Promise<string> {
-  if (/^https?:/i.test(uri)) return uri;
+/**
+ * Uploads a picked photo as an avatar and returns its public URL and storage key (the key is
+ * what `PATCH /api/me/account` takes); preset URLs pass through without a key.
+ */
+export async function uploadAvatar(
+  token: string,
+  uri: string
+): Promise<{ publicUrl: string; key: string | null }> {
+  if (/^https?:/i.test(uri)) return { publicUrl: uri, key: null };
   const prepared = await prepareAvatar(uri);
   const target = await apiRequest<UploadUrlResult>('/api/upload-url', {
     token,
@@ -86,5 +92,5 @@ export async function uploadAvatar(token: string, uri: string): Promise<string> 
   } catch {
     throw new Error('Không tải được ảnh lên. Hãy kiểm tra mạng và thử lại.');
   }
-  return target.publicUrl;
+  return { publicUrl: target.publicUrl, key: target.key };
 }

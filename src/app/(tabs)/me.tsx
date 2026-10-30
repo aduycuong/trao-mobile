@@ -92,6 +92,9 @@ export default function MeTab() {
                 </View>
                 <Pressable
                   accessibilityRole="button"
+                  onPress={() =>
+                    router.push({ pathname: '/u/[handle]', params: { handle: profile.handle } })
+                  }
                   className="h-9 justify-center rounded-[10px] bg-[#F1F7FE] px-3"
                 >
                   <AppText className="text-[13px] font-vn-semibold text-[#1673D9]">
@@ -102,14 +105,22 @@ export default function MeTab() {
 
               <View className="mx-4 mt-4 flex-row rounded-2xl border border-[#E8ECF0] py-1">
                 {[
-                  { n: profile.followerCount, label: 'Followers' },
-                  { n: profile.followingCount, label: 'Following' },
-                  { n: profile.completedCount, label: 'Giao dịch' },
+                  { n: profile.followerCount, label: 'Followers', tab: 'followers' },
+                  { n: profile.followingCount, label: 'Following', tab: 'following' },
+                  { n: profile.completedCount, label: 'Giao dịch', tab: null },
                 ].map((item) => (
-                  <View key={item.label} className="flex-1 items-center gap-px px-1 py-2.5">
+                  <Pressable
+                    key={item.label}
+                    accessibilityRole={item.tab ? 'button' : undefined}
+                    disabled={!item.tab}
+                    onPress={() =>
+                      item.tab && router.push({ pathname: '/follows', params: { tab: item.tab } })
+                    }
+                    className="flex-1 items-center gap-px px-1 py-2.5"
+                  >
                     <AppText className="text-[17px] font-vn-bold">{item.n}</AppText>
                     <AppText className="text-[12px] text-[#5A6772]">{item.label}</AppText>
-                  </View>
+                  </Pressable>
                 ))}
               </View>
 

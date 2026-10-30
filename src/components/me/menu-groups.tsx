@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -23,6 +24,8 @@ type Row = {
   meta?: string;
   /** "Sắp có": dimmed, no destination. */
   soon?: boolean;
+  /** Screen the row opens; rows of unbuilt parts of the plan have none yet. */
+  href?: '/account' | '/settings' | '/help' | '/help/feedback' | '/follows';
 };
 
 function buildGroups(profile: MyProfile): { title: string; rows: Row[] }[] {
@@ -35,6 +38,7 @@ function buildGroups(profile: MyProfile): { title: string; rows: Row[] }[] {
           label: 'Followers · Following',
           sub: 'Người theo dõi bạn và người bạn theo dõi',
           meta: `${profile.followerCount} · ${profile.followingCount}`,
+          href: '/follows',
         },
         { icon: 'invite', label: 'Mời bạn bè', sub: 'Gửi link mời bạn bè vào Trao' },
         { icon: 'group', label: 'Nhóm', sub: 'Hội nhóm theo sở thích', meta: 'Sắp có', soon: true },
@@ -43,18 +47,30 @@ function buildGroups(profile: MyProfile): { title: string; rows: Row[] }[] {
     {
       title: 'Tài khoản & ứng dụng',
       rows: [
-        { icon: 'user', label: 'Tài khoản', sub: 'Hồ sơ, email, số điện thoại, mật khẩu' },
+        {
+          icon: 'user',
+          label: 'Tài khoản',
+          sub: 'Hồ sơ, email, số điện thoại, mật khẩu',
+          href: '/account',
+        },
         {
           icon: 'gear',
           label: 'Cài đặt',
           sub: 'Thông báo, tự phát video, khu vực, giao diện',
+          href: '/settings',
         },
         {
           icon: 'help',
           label: 'Trợ giúp & chính sách',
           sub: 'An toàn giao dịch, hàng cấm, báo cáo của tôi',
+          href: '/help',
         },
-        { icon: 'invite', label: 'Góp ý cho Trao', sub: 'Gặp lỗi hay có ý tưởng? Nhắn đội Trao' },
+        {
+          icon: 'invite',
+          label: 'Góp ý cho Trao',
+          sub: 'Gặp lỗi hay có ý tưởng? Nhắn đội Trao',
+          href: '/help/feedback',
+        },
         {
           icon: 'wallet',
           label: 'Thanh toán qua trung gian',
@@ -68,10 +84,12 @@ function buildGroups(profile: MyProfile): { title: string; rows: Row[] }[] {
 }
 
 /**
- * The two menu groups of the Tôi tab. Rows open screens of later parts of the plan (followers,
- * account, settings, help), so for now they have no destination.
+ * The two menu groups of the Tôi tab. Account, settings, help and feedback open their screens; the rows of
+ * later parts of the plan (followers) have no destination yet.
  */
 export function MenuGroups({ profile }: { profile: MyProfile }) {
+  const router = useRouter();
+
   return (
     <>
       {buildGroups(profile).map((group) => (
@@ -86,7 +104,8 @@ export function MenuGroups({ profile }: { profile: MyProfile }) {
             <Pressable
               key={row.label}
               accessibilityRole="button"
-              accessibilityState={{ disabled: true }}
+              accessibilityState={{ disabled: !row.href }}
+              onPress={row.href ? () => router.push(row.href!) : undefined}
               className="min-h-14 flex-row items-center gap-3 px-4"
               style={{ opacity: row.soon ? 0.55 : 1 }}
             >

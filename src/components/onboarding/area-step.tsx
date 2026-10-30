@@ -13,6 +13,13 @@ const SUGGEST_DEBOUNCE_MS = 300;
 type AreaStepProps = {
   onBack: () => void;
   onPicked: (location: ResolvedLocation) => void;
+  /** Replaces the step bar when the picker is used outside the start flow (Tài khoản, Cài đặt). */
+  header?: React.ReactNode;
+  title?: string;
+  description?: string;
+  submitLabel?: string;
+  /** Disables the button while the caller saves the pick. */
+  saving?: boolean;
 };
 
 /** An area chosen from the suggestion list. */
@@ -29,7 +36,15 @@ function SuggestionLabel({ text, typed }: { text: string; typed: string }) {
   );
 }
 
-export function AreaStep({ onBack, onPicked }: AreaStepProps) {
+export function AreaStep({
+  onBack,
+  onPicked,
+  header,
+  title = 'Bạn ở khu vực nào?',
+  description = 'Không dùng vị trí cũng được — chọn khu vực để xếp đồ gần bạn lên trước.',
+  submitLabel = 'Tiếp tục',
+  saving,
+}: AreaStepProps) {
   const [input, setInput] = useState('');
   const [focused, setFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
@@ -90,7 +105,7 @@ export function AreaStep({ onBack, onPicked }: AreaStepProps) {
 
   return (
     <View className="flex-1 bg-white">
-      <OnboardingBar index={0} onBack={onBack} />
+      {header ?? <OnboardingBar index={0} onBack={onBack} />}
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-4 px-5 pb-5 pt-2"
@@ -98,10 +113,8 @@ export function AreaStep({ onBack, onPicked }: AreaStepProps) {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-1">
-          <AppText className="text-[23px] font-vn-bold">Bạn ở khu vực nào?</AppText>
-          <AppText className="text-[14px] leading-[21px] text-[#5A6772]">
-            Không dùng vị trí cũng được — chọn khu vực để xếp đồ gần bạn lên trước.
-          </AppText>
+          <AppText className="text-[23px] font-vn-bold">{title}</AppText>
+          <AppText className="text-[14px] leading-[21px] text-[#5A6772]">{description}</AppText>
         </View>
 
         <View className="gap-1.5">
@@ -230,8 +243,8 @@ export function AreaStep({ onBack, onPicked }: AreaStepProps) {
       </ScrollView>
       <View className="border-t border-[#EEF2F6] px-5 pb-6 pt-3">
         <FooterButton
-          label="Tiếp tục"
-          disabled={!picked || resolving}
+          label={submitLabel}
+          disabled={!picked || resolving || saving}
           onPress={() => picked && onPicked(picked.resolved)}
         />
       </View>

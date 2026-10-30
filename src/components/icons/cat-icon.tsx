@@ -40,6 +40,22 @@ export type CatIconKind =
   | 'listings'
   | 'me';
 
+/** Icon of a category by its slug, for a card without a photo. */
+export const CATEGORY_ICON_BY_SLUG: Record<string, CatIconKind> = {
+  'dien-thoai': 'phone',
+  laptop: 'laptop',
+  'may-anh': 'camera',
+  'gia-dung': 'appliance',
+  'noi-that': 'furniture',
+  'thoi-trang': 'fashion',
+  'xe-co': 'vehicle',
+  sach: 'book',
+  'do-em-be': 'baby',
+  'do-choi': 'toy',
+  'am-thanh': 'audio',
+  'suu-tam': 'collect',
+};
+
 // Same palette through the canvas `grayscale(1)` filter, for inactive tabs.
 const GRAY = {
   y: '#C3C3C3',
