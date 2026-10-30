@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "349717388405-1bpnt1ad66kmc43dl827ht3tc5d8gdj8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.trao.mobile",
+            "certificate_hash": "6728daf5024e460289c4b1e5237fea2c5c220cc6"
+          }
+        },
+        {
           "client_id": "349717388405-soih4unmclu1h6qbl1db0o47vjuh9ddu.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -30,6 +38,13 @@
             {
               "client_id": "349717388405-soih4unmclu1h6qbl1db0o47vjuh9ddu.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "349717388405-53tjht17nod4s2hr8hdbbm62o3n9ttgn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.trao.mobile"
+              }
             }
           ]
         }

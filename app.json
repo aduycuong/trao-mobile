@@ -74,16 +74,16 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.PLACEHOLDER_IOS_CLIENT_ID"
+          "iosUrlScheme": "com.googleusercontent.apps.349717388405-53tjht17nod4s2hr8hdbbm62o3n9ttgn"
         }
       ],
       [
         "react-native-fbsdk-next",
         {
-          "appID": "PLACEHOLDER_FACEBOOK_APP_ID",
-          "clientToken": "PLACEHOLDER_FACEBOOK_CLIENT_TOKEN",
+          "appID": "2294651478058842",
+          "clientToken": "a66fb70a8cfb407775a03c797b318ec6",
           "displayName": "Trao",
-          "scheme": "fbPLACEHOLDER_FACEBOOK_APP_ID",
+          "scheme": "fb2294651478058842",
           "iosUserTrackingPermission": false
         }
       ]
