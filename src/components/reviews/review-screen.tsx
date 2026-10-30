@@ -404,7 +404,12 @@ function ReviewBody({ context }: { context: ReviewContext }) {
                   </AppText>
                   <Pressable
                     accessibilityRole="button"
-                    onPress={() => Alert.alert('Báo cáo', 'Tính năng này sắp có.')}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/report',
+                        params: { type: 'transaction', id: context.transactionId },
+                      })
+                    }
                     className="self-start"
                   >
                     <AppText className="text-[13.5px] font-vn-bold text-[#B42318]">

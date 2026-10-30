@@ -21,7 +21,7 @@ import { ErrorBox } from '@/components/ui/form-controls';
 import { ICON_PLUS, PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
-import { usePostGuard } from '@/hooks/usePostGuard';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import { fetchMyListings, MY_LISTINGS_QUERY_KEY } from '@/services/listings/listings-api';
 import type {
   ListingGroup,
@@ -79,7 +79,7 @@ const EMPTY_TEXT: Record<ListingSegment, { title: string; text: string }> = {
 /** The Tin đăng tab (canvas GroupList, kind "listings"): the owner's listings by segment and group. */
 export default function ListingsTab() {
   const { session, getIdToken } = useAuth();
-  const guardPost = usePostGuard();
+  const postGuard = usePenaltyGuard();
   const [segment, setSegment] = useState<ListingSegment>('open');
   const [searching, setSearching] = useState(false);
   const [text, setText] = useState('');
@@ -277,7 +277,7 @@ export default function ListingsTab() {
         accessibilityRole="button"
         accessibilityLabel="Đăng tin"
         onPress={() => {
-          if (guardPost()) setChoosing(true);
+          if (postGuard.guard('post')) setChoosing(true);
         }}
         className="absolute bottom-4 right-4 h-[54px] flex-row items-center justify-center gap-2 rounded-[18px] bg-[#1673D9] pl-4 pr-[22px]"
         style={{
@@ -293,6 +293,7 @@ export default function ListingsTab() {
       </Pressable>
 
       {choosing ? <PostStartSheet onClose={() => setChoosing(false)} /> : null}
+      {postGuard.sheet}
     </View>
   );
 }

@@ -11,6 +11,7 @@ import { CancelSheet } from '@/components/transactions/cancel-sheet';
 import { AppText } from '@/components/ui/app-text';
 import { PathIcon } from '@/components/ui/path-icon';
 import { useDealActions } from '@/hooks/useDealActions';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import { useTransactionActions } from '@/hooks/useTransactionActions';
 import {
   describeDealBanner,
@@ -104,6 +105,7 @@ export function DealBanner({
 }) {
   const router = useRouter();
   const actions = useDealActions();
+  const tradeGuard = usePenaltyGuard();
   const transactionActions = useTransactionActions();
   const [offering, setOffering] = useState<OfferMode | null>(null);
   const [sheet, setSheet] = useState<'decline' | 'agree' | 'confirm' | 'cancel' | null>(null);
@@ -133,7 +135,7 @@ export function DealBanner({
     const mode =
       key === 'reoffer' ? (deal.listing.type === 'trade' ? 'swap' : 'price') : OFFER_MODE[key];
     if (mode) {
-      setOffering(mode);
+      if (tradeGuard.guard('trade')) setOffering(mode);
       return;
     }
     if (key === 'bid') {
@@ -145,7 +147,7 @@ export function DealBanner({
     else if (key === 'bidDecline' && deal.auction?.offerForMe) {
       void actions.declineBidOffer(deal.auction.offerForMe.bidId);
     } else if (key === 'bidAccept' && deal.auction?.offerForMe) {
-      void actions.acceptBidOffer(deal.auction.offerForMe.bidId);
+      if (tradeGuard.guard('trade')) void actions.acceptBidOffer(deal.auction.offerForMe.bidId);
     } else if (key === 'confirmTransaction') setSheet('confirm');
     else if (key === 'cancelTransaction') setSheet('cancel');
     else if (key === 'review' && deal.transaction) {
@@ -280,6 +282,7 @@ export function DealBanner({
         ) : null}
       </LinearGradient>
 
+      {tradeGuard.sheet}
       {offering ? (
         <OfferSheet
           listing={{ id: deal.listing.id, title: deal.listing.title, price: deal.listing.price }}

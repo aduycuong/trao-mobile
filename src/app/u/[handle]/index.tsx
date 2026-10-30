@@ -436,6 +436,16 @@ export default function ProfileScreen() {
           onClose={() => setSheet('none')}
           onShare={() => void share()}
           onBlock={() => setSheet('block')}
+          onReport={() => {
+            setSheet('none');
+            if (!session) router.push('/auth-gate');
+            else {
+              router.push({
+                pathname: '/report',
+                params: { type: 'user', id: profile?.handle ?? handle },
+              });
+            }
+          }}
         />
       ) : null}
       {sheet === 'block' ? (

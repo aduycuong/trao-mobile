@@ -11,6 +11,12 @@ describe('routeForNotificationData', () => {
     expect(routeForNotificationData({ listingId: 'l1', dealId: 'd1' })).toBe('/l/l1');
   });
 
+  it('opens the report, the case or the card a push is about', () => {
+    expect(routeForNotificationData({ reportId: 'r1' })).toBe('/reports/r1');
+    expect(routeForNotificationData({ caseId: 'c1' })).toBe('/cases/c1');
+    expect(routeForNotificationData({ penaltyId: 'p1' })).toBe('/penalty/p1');
+  });
+
   it('ignores unknown or malformed data', () => {
     expect(routeForNotificationData(undefined)).toBeNull();
     expect(routeForNotificationData({ type: 'other' })).toBeNull();

@@ -8,6 +8,7 @@ type ProfileMoreSheetProps = {
   onClose: () => void;
   onShare: () => void;
   onBlock: () => void;
+  onReport: () => void;
 };
 
 type Row = {
@@ -17,13 +18,11 @@ type Row = {
   ink: string;
   bg: string;
   color: string;
-  /** Rows of a later part of the plan show but do nothing yet. */
-  soon?: boolean;
-  onPress?: () => void;
+  onPress: () => void;
 };
 
 /** Options of someone else's profile (canvas Profile, sheet "more"). */
-export function ProfileMoreSheet({ onClose, onShare, onBlock }: ProfileMoreSheetProps) {
+export function ProfileMoreSheet({ onClose, onShare, onBlock, onReport }: ProfileMoreSheetProps) {
   const insets = useSafeAreaInsets();
   const rows: Row[] = [
     {
@@ -42,7 +41,7 @@ export function ProfileMoreSheet({ onClose, onShare, onBlock }: ProfileMoreSheet
       ink: '#B42318',
       bg: '#FDECEA',
       color: '#B42318',
-      soon: true,
+      onPress: onReport,
     },
     {
       label: 'Chặn',
@@ -74,10 +73,8 @@ export function ProfileMoreSheet({ onClose, onShare, onBlock }: ProfileMoreSheet
             <Pressable
               key={row.label}
               accessibilityRole="button"
-              accessibilityState={{ disabled: !row.onPress }}
               onPress={row.onPress}
               className="flex-row items-center gap-3.5 rounded-xl px-2 py-3"
-              style={{ opacity: row.soon ? 0.55 : 1 }}
             >
               <View
                 className="h-[38px] w-[38px] items-center justify-center rounded-[11px]"

@@ -1,5 +1,5 @@
 import React, { memo, useRef } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { ChatMediaGrid } from '@/components/chat/chat-media-grid';
 import { ChatSticker } from '@/components/chat/chat-sticker';
@@ -36,6 +36,8 @@ type BubbleHandlers = {
   onOpenImage: (item: ChatThreadItem, index: number) => void;
   onRetry: (item: ChatThreadItem) => void;
   onDiscard: (item: ChatThreadItem) => void;
+  /** Reports the sender (the "Báo cáo" of the scam caution). */
+  onReport: (item: ChatThreadItem) => void;
 };
 
 type ChatBubbleProps = BubbleHandlers & {
@@ -221,7 +223,7 @@ function MetaLine({ item }: { item: ChatThreadItem }) {
   );
 }
 
-function ScamNotice({ text }: { text: string }) {
+function ScamNotice({ text, onReport }: { text: string; onReport: () => void }) {
   const signs = detectScamSigns(text);
   if (signs.length === 0) return null;
   return (
@@ -251,11 +253,7 @@ function ScamNotice({ text }: { text: string }) {
             {SCAM_WARNINGS[sign]}
           </AppText>
         ))}
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => Alert.alert('Báo cáo', 'Tính năng báo cáo sẽ có ở bản cập nhật tới.')}
-          className="self-start"
-        >
+        <Pressable accessibilityRole="button" onPress={onReport} className="self-start">
           <AppText className="text-[12.5px] font-vn-bold text-[#B42318]">Báo cáo</AppText>
         </Pressable>
       </View>
@@ -272,6 +270,7 @@ function ChatBubbleView({
   onOpenImage,
   onRetry,
   onDiscard,
+  onReport,
 }: ChatBubbleProps) {
   const bubbleRef = useRef<View>(null);
   if (item.kind === 'system') return <ChatSystemLine item={item} />;
@@ -376,7 +375,7 @@ function ChatBubbleView({
 
       {!mine && !item.deleted && !item.blocked && item.text && item.kind === 'text' ? (
         <View className="max-w-[76%]">
-          <ScamNotice text={item.text} />
+          <ScamNotice text={item.text} onReport={() => onReport(item)} />
         </View>
       ) : null}
     </View>
@@ -399,6 +398,7 @@ function sameBubble(prev: ChatBubbleProps, next: ChatBubbleProps) {
     prev.onOpenImage === next.onOpenImage &&
     prev.onRetry === next.onRetry &&
     prev.onDiscard === next.onDiscard &&
+    prev.onReport === next.onReport &&
     a.key === b.key &&
     a.id === b.id &&
     a.status === b.status &&
