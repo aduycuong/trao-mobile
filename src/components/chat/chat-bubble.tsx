@@ -18,7 +18,11 @@ import {
 
 /** Colors of a system line (canvas Chat): [background, text]. */
 /** Line height of the reaction chip's text, so it sits in the middle of the 24px chip. */
-const CHIP_TEXT = { lineHeight: 16 } as const;
+const CHIP_TEXT = {
+  lineHeight: 16,
+  includeFontPadding: false,
+  textAlignVertical: 'center',
+} as const;
 
 const SYSTEM_TONES: Record<ChatSystemTone, readonly [string, string]> = {
   info: ['#E9EEF4', '#33414D'],
@@ -345,12 +349,7 @@ function ChatBubbleView({
                 style={{ elevation: 1 }}
               >
                 {/* A fixed line height keeps the font's tall metrics from pushing the text low. */}
-                <AppText
-                  className="text-[13px]"
-                  style={CHIP_TEXT}
-                  includeFontPadding={false}
-                  textAlignVertical="center"
-                >
+                <AppText className="text-[13px]" style={CHIP_TEXT}>
                   {reaction.emoji}
                 </AppText>
                 <AppText
@@ -358,8 +357,6 @@ function ChatBubbleView({
                     on ? 'text-[#0B4A99]' : 'text-[#5A6772]'
                   }`}
                   style={CHIP_TEXT}
-                  includeFontPadding={false}
-                  textAlignVertical="center"
                 >
                   {reaction.count}
                 </AppText>
