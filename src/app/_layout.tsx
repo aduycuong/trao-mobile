@@ -31,7 +31,11 @@ export default function RootLayout() {
       <PushEffects />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="auth-gate" options={{ presentation: 'modal' }} />
+        {/* Full height like the web gate; it still slides up from the bottom. */}
+        <Stack.Screen
+          name="auth-gate"
+          options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+        />
       </Stack>
     </AppProviders>
   );
