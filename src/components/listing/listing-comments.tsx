@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { ConfirmSheet } from '@/components/me/confirm-sheet';
@@ -8,6 +8,7 @@ import { UserAvatar } from '@/components/me/user-avatar';
 import { AppText } from '@/components/ui/app-text';
 import { ErrorBox, SkeletonBlock } from '@/components/ui/form-controls';
 import { useAuth } from '@/hooks/useAuth';
+import { subscribeListingSignal } from '@/services/chat/rtdb';
 import {
   COMMENT_MAX_LENGTH,
   fetchComments,
@@ -49,6 +50,17 @@ export function ListingComments({ listingId }: { listingId: string }) {
       initialPageParam: 0,
       getNextPageParam: (last) => last.nextOffset ?? undefined,
     });
+
+  // Someone else commented, replied or took a comment down: read the list again.
+  useEffect(() => {
+    return (
+      subscribeListingSignal(
+        listingId,
+        'comments',
+        () => void queryClient.invalidateQueries({ queryKey: ['listing-comments', listingId] })
+      ) ?? undefined
+    );
+  }, [listingId, queryClient]);
 
   const total = data?.pages[0]?.total ?? 0;
   const comments = data?.pages.flatMap((page) => page.items) ?? [];

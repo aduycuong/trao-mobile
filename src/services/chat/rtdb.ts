@@ -188,20 +188,17 @@ export function subscribePhoneVerifiedSignal(
   );
 }
 
-/** Doorbell of a live auction: the server writes here at every bid and when the round ends. */
-export const AUCTION_SIGNAL_PATH = 'auction-signal';
-
 /**
- * Calls `onRing` at every change the server writes to `auction-signal/{listingId}` (not for the
- * value already there when subscribing, which the page has just read). Returns the unsubscribe
+ * Calls `onRing` at every change the server writes to a doorbell node, not for the value
+ * already there when subscribing (the screen has just read that). Returns the unsubscribe
  * function, or null when RTDB is not available.
  */
-export function subscribeAuctionSignal(listingId: string, onRing: () => void) {
+function subscribeDoorbell(path: string, label: string, onRing: () => void) {
   const db = getDb();
   if (!db) return null;
   let first = true;
   return onValue(
-    ref(db, `${AUCTION_SIGNAL_PATH}/${listingId}`),
+    ref(db, path),
     () => {
       if (first) {
         first = false;
@@ -209,6 +206,40 @@ export function subscribeAuctionSignal(listingId: string, onRing: () => void) {
       }
       onRing();
     },
-    (error) => console.warn('[auctions] signal error', error)
+    (error) => console.warn(`[${label}] signal error`, error)
   );
+}
+
+/** Doorbell of a live auction: the server writes here at every bid and when the round ends. */
+export const AUCTION_SIGNAL_PATH = 'auction-signal';
+
+export function subscribeAuctionSignal(listingId: string, onRing: () => void) {
+  return subscribeDoorbell(`${AUCTION_SIGNAL_PATH}/${listingId}`, 'auctions', onRing);
+}
+
+/**
+ * Doorbell of the public parts of a listing page: `listing-signal/{listingId}/comments` gets the
+ * time of the last comment or reply posted, deleted or hidden. Guests may read it.
+ */
+export const LISTING_SIGNAL_PATH = 'listing-signal';
+export type ListingSignalKind = 'comments';
+
+export function subscribeListingSignal(
+  listingId: string,
+  kind: ListingSignalKind,
+  onRing: () => void
+) {
+  return subscribeDoorbell(`${LISTING_SIGNAL_PATH}/${listingId}/${kind}`, 'listings', onRing);
+}
+
+/**
+ * Doorbell of what changed for one user, readable by that user only: `deals` (an offer was sent,
+ * taken back, answered or declined, or a transaction was confirmed, cancelled or reviewed) and
+ * `notifications` (one was added to the list).
+ */
+export const USER_EVENT_PATH = 'user-events';
+export type UserEventKind = 'deals' | 'notifications';
+
+export function subscribeUserEvent(firebaseUid: string, kind: UserEventKind, onRing: () => void) {
+  return subscribeDoorbell(`${USER_EVENT_PATH}/${firebaseUid}/${kind}`, 'user-events', onRing);
 }
