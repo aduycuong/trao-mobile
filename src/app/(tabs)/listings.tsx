@@ -3,9 +3,9 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
 import { TabIcon } from '@/components/icons/tab-icon';
-import { TabHeader } from '@/components/navigation/tab-header';
 import { PostStartSheet } from '@/components/post/post-start-sheet';
 import { ItemThumb } from '@/components/stock/item-thumb';
 import { AppText } from '@/components/ui/app-text';
@@ -71,6 +71,7 @@ const EMPTY_TEXT: Record<ListingSegment, { title: string; text: string }> = {
 
 /** The Tin đăng tab (canvas GroupList, kind "listings"): the owner's listings by segment and group. */
 export default function ListingsTab() {
+  const insets = useSafeAreaInsets();
   const { session, getIdToken } = useAuth();
   const postGuard = usePenaltyGuard();
   const [segment, setSegment] = useState<ListingSegment>('open');
@@ -109,8 +110,8 @@ export default function ListingsTab() {
 
   const header = (
     <View>
-      <TabHeader />
-      <View className="mt-1 rounded-t-[26px] bg-white pt-[18px]">
+      {/* No logo header here (the web has none on this tab): the safe area and the web's pt-3. */}
+      <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
         <View className="flex-row items-center pl-4 pr-2">
           <AppText
             accessibilityRole="header"
@@ -226,7 +227,7 @@ export default function ListingsTab() {
   );
 
   return (
-    <View className="flex-1 bg-[#E6F1FF]">
+    <View className="flex-1 bg-white">
       <FlatList
         data={rows}
         keyExtractor={(row) => row.id}

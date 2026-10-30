@@ -3,8 +3,8 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CatIcon } from '@/components/icons/cat-icon';
-import { TabHeader } from '@/components/navigation/tab-header';
 import { AddTagSheet } from '@/components/stock/add-tag-sheet';
 import { ItemThumb } from '@/components/stock/item-thumb';
 import { NOTE_STYLE } from '@/components/stock/note-style';
@@ -35,6 +35,7 @@ const CHECKING_REFETCH_MS = 30000;
 export default function StockTab() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const { session, getIdToken } = useAuth();
   const [addingTag, setAddingTag] = useState(false);
   const [tag, setTag] = useState<string | null>(null);
@@ -111,8 +112,8 @@ export default function StockTab() {
 
   const header = (
     <View>
-      <TabHeader />
-      <View className="mt-1 rounded-t-[26px] bg-white pt-[18px]">
+      {/* No logo header here (the web has none on this tab): the safe area and the web's pt-3. */}
+      <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
         <View className="flex-row items-center pl-4 pr-2">
           <AppText
             accessibilityRole="header"
@@ -252,7 +253,7 @@ export default function StockTab() {
   );
 
   return (
-    <View className="flex-1 bg-[#E6F1FF]">
+    <View className="flex-1 bg-white">
       <FlatList
         data={rows}
         keyExtractor={(row) => row.id}
