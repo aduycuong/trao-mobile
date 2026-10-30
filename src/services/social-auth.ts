@@ -21,8 +21,6 @@ export const SOCIAL_PROVIDER_NAMES: Record<SocialProvider, string> = {
 };
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
-// iOS has no GoogleService-Info.plist here, so the iOS OAuth client id is passed in.
-const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim() || undefined;
 
 /** A message already written for the user, safe to show as it is. */
 class SocialAuthError extends Error {}
@@ -35,7 +33,7 @@ async function googleCredential(): Promise<AuthCredential | null> {
   }
   // Loaded on demand so a dev client built before this module existed still starts.
   const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
-  GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID, iosClientId: GOOGLE_IOS_CLIENT_ID });
+  GoogleSignin.configure({ webClientId: GOOGLE_WEB_CLIENT_ID });
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   const response = await GoogleSignin.signIn();
   if (response.type !== 'success') return null;
