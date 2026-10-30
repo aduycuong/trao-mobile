@@ -22,8 +22,15 @@ export async function pickScreenshots(limit: number): Promise<string[]> {
 
 type UploadUrlResult = { uploadUrl: string; key: string };
 
-/** Re-encodes a screenshot as JPEG (dropping EXIF) and uploads it; resolves to its storage key. */
-export async function uploadScreenshot(token: string, uri: string): Promise<string> {
+/**
+ * Re-encodes a screenshot as JPEG (dropping EXIF) and uploads it; resolves to its storage key.
+ * Feedback and report evidence (reports, statements, appeals) share this path.
+ */
+export async function uploadScreenshot(
+  token: string,
+  uri: string,
+  uploadType: 'feedback' | 'evidence' = 'feedback'
+): Promise<string> {
   let prepared: { uri: string };
   try {
     const image = await ImageManipulator.manipulate(uri).renderAsync();
@@ -44,7 +51,7 @@ export async function uploadScreenshot(token: string, uri: string): Promise<stri
   const size = new File(prepared.uri).size ?? 0;
   const target = await apiRequest<UploadUrlResult>('/api/upload-url', {
     token,
-    body: { uploadType: 'feedback', contentType: MIME, contentLength: size },
+    body: { uploadType, contentType: MIME, contentLength: size },
   });
   try {
     await fileUploadTransport.put({ url: target.uploadUrl, uri: prepared.uri, contentType: MIME });
