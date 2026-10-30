@@ -17,6 +17,9 @@ import {
 } from '@/services/chat/chat-view';
 
 /** Colors of a system line (canvas Chat): [background, text]. */
+/** Line height of the reaction chip's text, so it sits in the middle of the 24px chip. */
+const CHIP_TEXT = { lineHeight: 16 } as const;
+
 const SYSTEM_TONES: Record<ChatSystemTone, readonly [string, string]> = {
   info: ['#E9EEF4', '#33414D'],
   deal: ['#FFF4D6', '#8A5A00'],
@@ -336,16 +339,27 @@ function ChatBubbleView({
                 accessibilityState={{ selected: on }}
                 accessibilityLabel={`${reaction.emoji} ${reaction.count}`}
                 onPress={() => onReact(item, reaction.emoji)}
-                className={`h-6 flex-row items-center gap-[3px] rounded-full border px-[7px] ${
+                className={`h-6 flex-row items-center justify-center gap-[3px] rounded-full border px-[7px] ${
                   on ? 'border-[#1673D9] bg-[#E6F1FF]' : 'border-[#E1E7EE] bg-white'
                 }`}
                 style={{ elevation: 1 }}
               >
-                <AppText className="text-[13px]">{reaction.emoji}</AppText>
+                {/* A fixed line height keeps the font's tall metrics from pushing the text low. */}
+                <AppText
+                  className="text-[13px]"
+                  style={CHIP_TEXT}
+                  includeFontPadding={false}
+                  textAlignVertical="center"
+                >
+                  {reaction.emoji}
+                </AppText>
                 <AppText
                   className={`text-[11.5px] font-vn-semibold ${
                     on ? 'text-[#0B4A99]' : 'text-[#5A6772]'
                   }`}
+                  style={CHIP_TEXT}
+                  includeFontPadding={false}
+                  textAlignVertical="center"
                 >
                   {reaction.count}
                 </AppText>
