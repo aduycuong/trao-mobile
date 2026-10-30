@@ -65,3 +65,67 @@ export function formatTimeLeft(endsAt: string, now: number): string {
   if (minutes >= 60) return `${Math.floor(minutes / 60)}g ${minutes % 60}p`;
   return `${minutes} phút`;
 }
+
+const eventTime = new Intl.DateTimeFormat('vi-VN', {
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
+
+/** `16/10 · 09:12` in Vietnam time. */
+export function formatEventTime(iso: string): string {
+  const parts = Object.fromEntries(
+    eventTime.formatToParts(new Date(iso)).map((part) => [part.type, part.value])
+  );
+  return `${parts.day}/${parts.month} · ${parts.hour}:${parts.minute}`;
+}
+
+/** `01:24:10`, with days in front when more than a day is left. */
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(total / 86_400);
+  const rest = total % 86_400;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const clock = `${pad(Math.floor(rest / 3600))}:${pad(Math.floor((rest % 3600) / 60))}:${pad(rest % 60)}`;
+  return days > 0 ? `${days} ngày ${clock}` : clock;
+}
+
+/** `20:00` in Vietnam time. */
+export function formatClock(iso: string): string {
+  return new Intl.DateTimeFormat('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Ho_Chi_Minh',
+  }).format(new Date(iso));
+}
+
+/** "Vừa xong", "5 phút trước", "2 ngày trước", or the date after a week. */
+export function formatRelativeTime(value: string | Date, now = Date.now()): string {
+  const time = new Date(value).getTime();
+  if (Number.isNaN(time)) return '';
+  const seconds = Math.floor((now - time) / 1000);
+  if (seconds < 60) return 'Vừa xong';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} phút trước`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} ngày trước`;
+  const date = new Date(time);
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'Asia/Ho_Chi_Minh',
+    })
+      .formatToParts(date)
+      .map((part) => [part.type, part.value])
+  );
+  const sameYear = Number(parts.year) === new Date(now).getFullYear();
+  return sameYear ? `${parts.day}/${parts.month}` : `${parts.day}/${parts.month}/${parts.year}`;
+}

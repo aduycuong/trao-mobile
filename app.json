@@ -58,8 +58,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Trao cần quyền truy cập ảnh để chọn ảnh đại diện và gửi ảnh.",
-          "cameraPermission": "Trao cần dùng máy ảnh để chụp ảnh đại diện và ảnh gửi đi.",
+          "photosPermission": "Trao cần quyền truy cập ảnh để chọn ảnh đại diện, ảnh đồ và gửi ảnh.",
+          "cameraPermission": "Trao cần dùng máy ảnh để chụp ảnh đại diện, ảnh đồ và ảnh gửi đi.",
           "microphonePermission": false
         }
       ],
@@ -69,7 +69,8 @@
           "locationWhenInUsePermission": "Để hiện đồ gần bạn và tính khoảng cách."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-video"
     ],
     "extra": {
       "router": {},
