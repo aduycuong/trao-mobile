@@ -809,7 +809,7 @@ function TagSheet({
   const colorOf = (name: string) => known.find((entry) => entry.tag === name)?.color ?? '#1673D9';
 
   const save = useMutation({
-    mutationFn: async () => updateMyItem(await getIdToken(), itemId, { tags: selected }),
+    mutationFn: async (tags: string[]) => updateMyItem(await getIdToken(), itemId, { tags }),
     onSuccess: onSaved,
     onError: (caught) => Alert.alert('Không lưu được tag', caught.message || 'Thử lại sau.'),
   });
@@ -824,13 +824,33 @@ function TagSheet({
     }
   }
 
-  function addDraft() {
+  /**
+   * Turns the typed name into a tag on top of `base` and closes the field. Returns the new
+   * selection; calling it twice with the same `base` (submit, then blur) gives the same result.
+   */
+  function takeDraft(base: string[]): string[] {
     const name = draft.trim().toLowerCase().slice(0, ITEM_TAG_MAX_LENGTH);
     setDraft('');
     setAdding(false);
-    if (!name) return;
-    if (!names.includes(name)) setCreated((now) => [...now, name]);
-    if (!selected.includes(name)) toggle(name);
+    if (!name) return base;
+    if (!names.includes(name)) setCreated((now) => (now.includes(name) ? now : [...now, name]));
+    if (base.includes(name)) return base;
+    if (base.length >= ITEM_TAGS_MAX_COUNT) {
+      Alert.alert('Chưa thêm được tag', `Tối đa ${ITEM_TAGS_MAX_COUNT} tag.`);
+      return base;
+    }
+    return [...base, name];
+  }
+
+  function addDraft() {
+    setSelected(takeDraft(selected));
+  }
+
+  /** "Xong" saves what is typed too: the field keeps focus when a button is tapped, so no blur commits it. */
+  function done() {
+    const next = takeDraft(selected);
+    setSelected(next);
+    save.mutate(next);
   }
 
   return (
@@ -892,7 +912,7 @@ function TagSheet({
       </View>
       <View className="flex-row gap-2.5">
         <BarButton label="Huỷ" tone="tinted" onPress={onClose} />
-        <BarButton label="Xong" flex={1.4} loading={save.isPending} onPress={() => save.mutate()} />
+        <BarButton label="Xong" flex={1.4} loading={save.isPending} onPress={done} />
       </View>
     </BottomSheet>
   );
