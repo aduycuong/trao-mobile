@@ -98,7 +98,7 @@ export default function FollowsScreen() {
 
   const header = (
     <View>
-      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 py-3">
+      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 pb-2.5 pt-3">
         {(
           [
             ['followers', 'Followers', counts.followers],
