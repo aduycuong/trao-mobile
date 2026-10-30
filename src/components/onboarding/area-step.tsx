@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { AuthError } from '@/components/auth/auth-ui';
 import { AppText } from '@/components/ui/app-text';
@@ -53,6 +53,7 @@ export function AreaStep({
   const [error, setError] = useState<string | null>(null);
   // One token per search box, shared by the suggestions and the pick that ends them.
   const sessionTokenRef = useRef(Crypto.randomUUID());
+  const inputRef = useRef<TextInput>(null);
 
   const typed = input.trim();
 
@@ -104,7 +105,7 @@ export function AreaStep({
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <KeyboardAvoidingView behavior="padding" className="flex-1 bg-white">
       {header ?? <OnboardingBar index={0} onBack={onBack} />}
       <ScrollView
         className="flex-1"
@@ -119,7 +120,9 @@ export function AreaStep({
 
         <View className="gap-1.5">
           <AppText className="text-[13px] font-vn-semibold text-[#5A6772]">Khu vực của bạn</AppText>
-          <View
+          <Pressable
+            accessible={false}
+            onPress={() => inputRef.current?.focus()}
             className={`h-[50px] flex-row items-center gap-2 rounded-[14px] bg-white pl-3.5 pr-1.5 ${
               focused ? 'border-2 border-[#1673D9]' : 'border-[1.5px] border-[#D5DDE5]'
             }`}
@@ -136,6 +139,7 @@ export function AreaStep({
           >
             <PinIcon color={typed ? '#1673D9' : '#A3AEB9'} />
             <TextInput
+              ref={inputRef}
               accessibilityLabel="Khu vực của bạn"
               value={input}
               onChangeText={(text) => {
@@ -170,7 +174,7 @@ export function AreaStep({
                 </Svg>
               </Pressable>
             ) : null}
-          </View>
+          </Pressable>
           <AppText className="text-[12.5px] leading-[18.75px] text-[#5A6772]">
             Gõ tên phường, xã hoặc địa điểm gần bạn (đường, khu dân cư…). Không cần số nhà.
           </AppText>
@@ -248,6 +252,6 @@ export function AreaStep({
           onPress={() => picked && onPicked(picked.resolved)}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
