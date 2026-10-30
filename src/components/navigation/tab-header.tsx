@@ -1,13 +1,17 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { TraoLogo } from '@/components/auth/trao-logo';
 import { AppText } from '@/components/ui/app-text';
+import { useAuth } from '@/hooks/useAuth';
 
 /** Header shared by the tab screens (canvas Main): logo, tagline and the bell. */
 export function TabHeader() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { session } = useAuth();
 
   return (
     <View
@@ -38,6 +42,10 @@ export function TabHeader() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Thông báo"
+        onPress={() => {
+          // Notifications come later; a guest is asked to sign in first (canvas Main `openNotifs`).
+          if (!session) router.push('/auth-gate');
+        }}
         className="h-11 w-11 items-center justify-center rounded-full"
       >
         <Svg

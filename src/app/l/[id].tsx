@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { CatIcon } from '@/components/icons/cat-icon';
+import { ListingComments } from '@/components/listing/listing-comments';
 import { OwnerMenuSheet } from '@/components/listing/owner-menu-sheet';
 import { UserAvatar } from '@/components/me/user-avatar';
 import { PolicySheet } from '@/components/post/policy-sheet';
@@ -95,8 +96,8 @@ function useNow(active: boolean): number {
 
 /**
  * The page of a listing (canvas Detail), for a viewer and for its owner. Open to guests.
- * Likes work; the deal buttons, comments and the report link are drawn but answer "sắp có"
- * until the deal and comment parts are built.
+ * Likes and comments work; the deal buttons and the report link are drawn but answer "sắp có"
+ * until the deal and report parts are built.
  */
 export default function ListingPageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -253,7 +254,11 @@ export default function ListingPageScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <MediaGallery
           photos={page.photos}
           videos={page.videos}
@@ -714,19 +719,8 @@ export default function ListingPageScreen() {
           ) : null}
         </View>
 
-        <View className="mt-6 gap-3.5 border-t-8 border-[#F2F5F8] px-4 pb-3.5 pt-5">
-          <AppText accessibilityRole="header" className="text-[17px] font-vn-bold">
-            Bình luận
-          </AppText>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => comingSoon('Bình luận')}
-            className="h-11 justify-center rounded-xl bg-[#F2F5F8] px-3.5"
-          >
-            <AppText className="text-[14px] text-[#5A6772]">
-              {session ? 'Bình luận sắp có' : 'Đăng nhập để bình luận'}
-            </AppText>
-          </Pressable>
+        <ListingComments listingId={id} />
+        <View className="px-4">
           {!page.isOwner ? (
             <Pressable accessibilityRole="button" onPress={() => comingSoon('Báo cáo tin này')}>
               <AppText className="py-2 text-[13px] text-[#5A6772]">Báo cáo tin này</AppText>
