@@ -28,13 +28,15 @@ import {
 } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useItemMediaSignal } from '@/hooks/useItemMediaSignal';
 import { fetchMyItems, MY_ITEMS_QUERY_KEY } from '@/services/stock/items-api';
 import type { ItemListRow } from '@/types/stock';
 import { getAsyncStorage } from '@/utils/async-storage';
 
 const INTRO_HIDDEN_KEY = 'trao.stock-intro-hidden';
 /** While a photo or video of an item is being checked, the list is read again at this pace. */
-const CHECKING_REFETCH_MS = 5000;
+// The doorbell says when to look again; this only covers RTDB being unavailable.
+const CHECKING_REFETCH_MS = 30000;
 
 /** The Kho đồ tab (canvas StockList): the items the user holds, filtered by tag, with "Thêm đồ". */
 export default function StockTab() {
@@ -91,6 +93,12 @@ export default function StockTab() {
       )
         ? CHECKING_REFETCH_MS
         : false,
+  });
+
+  const anyChecking =
+    data?.pages.some((page) => page.items.some((row) => row.mediaStatus === 'checking')) ?? false;
+  useItemMediaSignal(anyChecking, () => {
+    void queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY });
   });
 
   const first = data?.pages[0];

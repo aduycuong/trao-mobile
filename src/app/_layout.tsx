@@ -7,11 +7,13 @@ import {
 } from '@expo-google-fonts/be-vietnam-pro';
 import { Stack } from 'expo-router';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useUserEvents } from '@/hooks/useUserEvents';
 import { AppProviders } from '@/providers';
 
-/** Push registration and tap routing; rendered inside the providers and the router. */
+/** Push registration, tap routing and the user's realtime doorbells; rendered inside the providers. */
 function PushEffects() {
   usePushNotifications();
+  useUserEvents();
   return null;
 }
 
