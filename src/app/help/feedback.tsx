@@ -305,18 +305,29 @@ export default function FeedbackScreen() {
               Qua email {session?.email || 'của bạn'} nếu cần hỏi thêm
             </AppText>
           </View>
+          {/* Sizes are plain styles (not classes) so the track and the knob cannot be squeezed. */}
           <Pressable
             accessibilityRole="switch"
             accessibilityLabel="Cho phép Trao liên hệ lại"
             accessibilityState={{ checked: allowContact }}
             onPress={() => setAllowContact((current) => !current)}
-            className={`h-7 w-[46px] shrink-0 rounded-full p-[3px] ${
-              allowContact ? 'items-end bg-[#1673D9]' : 'items-start bg-[#C3CCD6]'
-            }`}
+            style={{
+              width: 46,
+              height: 28,
+              padding: 3,
+              borderRadius: 14,
+              flexShrink: 0,
+              justifyContent: 'center',
+              backgroundColor: allowContact ? '#1673D9' : '#C3CCD6',
+            }}
           >
             <View
-              className="h-[22px] w-[22px] rounded-full bg-white"
               style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                alignSelf: allowContact ? 'flex-end' : 'flex-start',
+                backgroundColor: '#FFFFFF',
                 shadowColor: '#000000',
                 shadowOpacity: 0.2,
                 shadowRadius: 3,
