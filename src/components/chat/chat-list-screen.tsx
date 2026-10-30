@@ -1,18 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { ChatListRow, type DealStatusOf } from '@/components/chat/chat-list-row';
+import { ChatListRow } from '@/components/chat/chat-list-row';
 import { CatIcon } from '@/components/icons/cat-icon';
 import { AppText } from '@/components/ui/app-text';
 import { useChat } from '@/hooks/useChat';
 import { useChatDealIndex } from '@/hooks/useChatDealIndex';
 import {
   buildChatListRows,
+  type ChatDealSummary,
   type ChatListFilter,
   type ChatListRowData,
 } from '@/services/chat/chat-list';
+import { describeDealBanner } from '@/services/deals/deal-banner';
 
 const FILTERS: { id: ChatListFilter; label: string }[] = [
   { id: 'all', label: 'Tất cả' },
@@ -37,10 +39,10 @@ function SkeletonRows() {
 
 /**
  * The Tin nhắn tab (canvas Chat, list): one row per person with the last message, the time and
- * the unread count; search by name; filter Tất cả / Đang giao dịch. `statusOf` is the slot for the
- * short deal status on each row (part 7B).
+ * the unread count; search by name; filter Tất cả / Đang giao dịch. Each chat shows its deals
+ * under the last message with the same short status as the chat banner.
  */
-export function ChatListScreen({ statusOf }: { statusOf?: DealStatusOf }) {
+export function ChatListScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { ready, allDialogs, meUserId, firebaseUid, engine } = useChat();
@@ -51,11 +53,31 @@ export function ChatListScreen({ statusOf }: { statusOf?: DealStatusOf }) {
 
   // Something new in a chat may be an offer or an answer: read the deal index again.
   const activity = allDialogs.map((dialog) => `${dialog.id}:${dialog.lastSeq}`).join(',');
-  const { deals } = useChatDealIndex(activity);
+  const { deals, dialogs: indexDialogs } = useChatDealIndex(activity);
+  // A chat that has a deal but no message yet is not in the local store: the deal index carries its row.
+  const dialogs = useMemo(() => {
+    const known = new Set(allDialogs.map((dialog) => dialog.id));
+    return [...allDialogs, ...indexDialogs.filter((dialog) => !known.has(dialog.id))];
+  }, [allDialogs, indexDialogs]);
+  const dealById = useMemo(() => new Map(deals.map((deal) => [deal.id, deal])), [deals]);
+  const statusOf = useCallback(
+    (deal: ChatDealSummary) => {
+      const full = dealById.get(deal.id);
+      return full ? describeDealBanner(full).status : null;
+    },
+    [dealById]
+  );
+  const toneOf = useCallback(
+    (deal: ChatDealSummary) => {
+      const full = dealById.get(deal.id);
+      return full ? describeDealBanner(full).tone : 'ref';
+    },
+    [dealById]
+  );
 
   const { rows, dealCount } = useMemo(
-    () => buildChatListRows({ dialogs: allDialogs, firebaseUid, deals, filter, query }),
-    [allDialogs, firebaseUid, deals, filter, query]
+    () => buildChatListRows({ dialogs, firebaseUid, deals, filter, query }),
+    [dialogs, firebaseUid, deals, filter, query]
   );
 
   async function refresh() {
@@ -171,7 +193,7 @@ export function ChatListScreen({ statusOf }: { statusOf?: DealStatusOf }) {
         data={ready ? rows : []}
         keyExtractor={(row) => row.dialog.id}
         renderItem={({ item }) => (
-          <ChatListRow row={item} meUserId={meUserId} statusOf={statusOf} />
+          <ChatListRow row={item} meUserId={meUserId} statusOf={statusOf} toneOf={toneOf} />
         )}
         ListEmptyComponent={ready ? empty : <SkeletonRows />}
         keyboardShouldPersistTaps="handled"

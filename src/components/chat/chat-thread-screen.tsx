@@ -57,7 +57,8 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
   const { ready } = useChat();
   const thread = useChatThread(inboxId);
   const { dialog, items, meUserId, firebaseUid } = thread;
-  const banner = useThreadBanner(inboxId, listingId);
+  const lastSystemKey = [...items].reverse().find((item) => item.kind === 'system')?.key;
+  const banner = useThreadBanner(inboxId, listingId, lastSystemKey);
 
   const listRef = useRef<FlatList<ChatThreadItem>>(null);
   const [replying, setReplying] = useState<{ inboxId: string; reply: ChatReplyTo } | null>(null);

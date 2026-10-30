@@ -1,27 +1,49 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
+import { DealBanners } from '@/components/deals/deal-banner';
 import { AppText } from '@/components/ui/app-text';
 import { PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchDeals } from '@/services/deals/deals-api';
 import { fetchListingPage } from '@/services/listings/listings-api';
 import { formatVnd } from '@/utils/format';
 
 /**
- * Extension point for part 7B: the deal banners of this chat (canvas Chat, `DealBanner`, drawn on
- * a #F7F9FB strip under the header). 7A has no deals, so there is no element and the listing card
- * below always shows. 7B returns the banners as `element` and sets `hasContextDeal` when one of
- * them is about `listingId`, which hides the listing card (the banner already says it).
+ * The deal banners of this chat (canvas Chat, DealBanner, drawn on a #F7F9FB strip under the
+ * header): every deal of the chat "Đang giao dịch" and the one about the listing that opened the
+ * chat. With none, the latest deal shows (a completed one still has its review to give).
+ * `hasContextDeal` hides the listing card when a banner is about `listingId`. `lastSystemKey`
+ * changes when a line about a deal arrives: the banner reads the deal again.
  */
 export function useThreadBanner(
   inboxId: string,
-  listingId: string | undefined
+  listingId: string | undefined,
+  lastSystemKey?: string
 ): { element: React.ReactNode; hasContextDeal: boolean } {
-  void inboxId;
-  void listingId;
-  return { element: null, hasContextDeal: false };
+  const queryClient = useQueryClient();
+  const { session, getIdToken } = useAuth();
+  const { data } = useQuery({
+    queryKey: ['deals', 'inbox', inboxId, session?.uid],
+    queryFn: async () => fetchDeals(await getIdToken(), { inboxId }),
+    enabled: !!session,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (lastSystemKey) void queryClient.invalidateQueries({ queryKey: ['deals'] });
+  }, [lastSystemKey, queryClient]);
+
+  const all = data?.items ?? [];
+  const active = all.filter((deal) => deal.active || deal.listing.id === listingId);
+  const shown = active.length > 0 ? active : all.slice(0, 1);
+  if (shown.length === 0) return { element: null, hasContextDeal: false };
+  return {
+    element: <DealBanners deals={shown} firstListingId={listingId} />,
+    hasContextDeal: shown.some((deal) => deal.listing.id === listingId),
+  };
 }
 
 /** The listing the talk is about, on top of the thread (web: opened with `?listing=`). */
