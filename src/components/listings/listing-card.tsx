@@ -19,13 +19,15 @@ type ListingCardProps = {
   listing: ListingCardData;
   /** The moment "time left" is measured from. Passed in so a list shares one clock. */
   now: number;
+  /** Shows the "more" button under the cover (Home); the screen opens its menu. */
+  onMenu?: () => void;
 };
 
 /**
  * Listing card (canvas ItemCard): cover, form badge, price or what the owner wants, condition and
  * place, and the save heart on the cover. Tapping the card opens the listing page.
  */
-export function ListingCard({ listing, now }: ListingCardProps) {
+export function ListingCard({ listing, now, onMenu }: ListingCardProps) {
   const router = useRouter();
   const { session, getIdToken } = useAuth();
   const { type } = listing;
@@ -178,6 +180,23 @@ export function ListingCard({ listing, now }: ListingCardProps) {
       </View>
 
       <View className="gap-[5px] px-0.5">
+        {onMenu ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tuỳ chọn khác"
+            onPress={onMenu}
+            className="absolute items-end justify-center"
+            style={{ top: -11, right: 0, width: 34, height: 44, zIndex: 2 }}
+          >
+            <View style={{ marginRight: 1 }}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="#5A6772">
+                <Circle cx={5.5} cy={12} r={1.6} />
+                <Circle cx={12} cy={12} r={1.6} />
+                <Circle cx={18.5} cy={12} r={1.6} />
+              </Svg>
+            </View>
+          </Pressable>
+        ) : null}
         {type === 'sell' && listing.price !== null ? (
           <View className="flex-row flex-wrap items-baseline gap-x-1.5 pr-[26px]">
             <AppText className="text-[15px] font-vn-bold tracking-[-0.15px]">
