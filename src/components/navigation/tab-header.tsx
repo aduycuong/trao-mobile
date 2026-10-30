@@ -6,12 +6,14 @@ import Svg, { Path } from 'react-native-svg';
 import { TraoLogo } from '@/components/auth/trao-logo';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 
 /** Header shared by the tab screens (canvas Main): logo, tagline and the bell. */
 export function TabHeader() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { session } = useAuth();
+  const unread = useUnreadNotifications().data?.all ?? 0;
 
   return (
     <View
@@ -41,10 +43,10 @@ export function TabHeader() {
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Thông báo"
+        accessibilityLabel={unread > 0 ? `Thông báo, có ${unread} chưa đọc` : 'Thông báo'}
         onPress={() => {
-          // Notifications come later; a guest is asked to sign in first (canvas Main `openNotifs`).
-          if (!session) router.push('/auth-gate');
+          // A guest is asked to sign in first (canvas Main `openNotifs`).
+          router.push(session ? '/notifications' : '/auth-gate');
         }}
         className="h-11 w-11 items-center justify-center rounded-full"
       >
@@ -60,6 +62,13 @@ export function TabHeader() {
           <Path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
           <Path d="M10 20.5a2 2 0 0 0 4 0" />
         </Svg>
+        {unread > 0 ? (
+          <View
+            pointerEvents="none"
+            className="absolute rounded-full border-2 border-[#E6F1FF] bg-[#D9480F]"
+            style={{ top: 10, right: 11, width: 12, height: 12 }}
+          />
+        ) : null}
       </Pressable>
     </View>
   );

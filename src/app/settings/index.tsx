@@ -220,7 +220,7 @@ export default function SettingsScreen() {
               <SettingRow
                 label="Thông báo"
                 sub="Bật / tắt thông báo đẩy theo loại"
-                onPress={() => Alert.alert('Thông báo', 'Cài đặt thông báo sẽ có trong bản sau.')}
+                onPress={() => router.push('/notifications/settings')}
               />
               <SettingRow
                 label="Khu vực mặc định"
