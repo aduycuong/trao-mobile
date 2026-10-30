@@ -330,6 +330,8 @@ export function HomeScreen() {
           </View>
         }
         contentContainerStyle={{ flexGrow: 1 }}
+        // The footer's own wrapper has to grow too, or its white background stops short.
+        ListFooterComponentStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.6}
         onEndReached={() => {

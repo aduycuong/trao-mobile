@@ -33,13 +33,14 @@ export default function MeTab() {
   return (
     <View className="flex-1 bg-[#E6F1FF]">
       <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={isRefetching && !isPending} onRefresh={() => refetch()} />
         }
       >
         <TabHeader />
-        <View className="mt-1 min-h-[600px] rounded-t-[26px] bg-white pb-6 pt-[18px]">
+        <View className="mt-1 flex-1 rounded-t-[26px] bg-white pb-6 pt-[18px]">
           {isPending ? (
             <View className="items-center py-10">
               <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
