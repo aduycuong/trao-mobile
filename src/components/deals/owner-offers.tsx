@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { DeclineSheet } from '@/components/deals/decline-sheet';
 import { ConfirmSheet } from '@/components/me/confirm-sheet';
 import { UserAvatar } from '@/components/me/user-avatar';
@@ -13,6 +13,8 @@ import { fetchListingOffers } from '@/services/deals/deals-api';
 import type { ListingOfferEntry } from '@/types/deals';
 import type { ListingType } from '@/types/people';
 import { formatRelativeTime } from '@/utils/format';
+import { SkeletonBlock } from '@/components/ui/form-controls';
+import { SkeletonGroup } from '@/components/ui/skeletons';
 
 type OffersKind = Exclude<ListingType, 'auction'> | 'buy';
 
@@ -79,9 +81,9 @@ export function OwnerOffers({
         </AppText>
       </View>
       {isPending ? (
-        <View className="items-center pb-4">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <SkeletonGroup className="px-3.5 pb-3.5">
+          <SkeletonBlock className="h-16 rounded-2xl" />
+        </SkeletonGroup>
       ) : null}
       {data && data.items.length === 0 ? (
         <AppText className="px-3.5 pb-4 text-[13.5px] leading-[20px] text-[#5A6772]">

@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { BarButton } from '@/components/ui/form-controls';
 import { fetchPolicyPage } from '@/services/help/help-api';
+import { PolicySheetSkeleton } from '@/components/ui/skeletons';
 
 /**
  * A policy page in a sheet over the current screen, so reading it does not leave a form half
@@ -20,7 +21,7 @@ export function PolicySheet({ slug, onClose }: { slug: string; onClose: () => vo
 
   return (
     <BottomSheet title={data?.title ?? 'Đang tải…'} onClose={onClose}>
-      {isPending ? <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText> : null}
+      {isPending ? <PolicySheetSkeleton /> : null}
       {error ? (
         <>
           <AppText accessibilityRole="alert" className="text-[14px] text-[#B42318]">

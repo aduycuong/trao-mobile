@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
@@ -24,6 +24,7 @@ import type { ListingOwnerDetail } from '@/types/listings';
 import { LISTING_TYPE_LABELS } from '@/types/people';
 import { describeStatus, describeStatusBar, type StatusAction } from '@/utils/listing-status';
 import { RequireSession } from '@/components/auth/require-session';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 const FORM_ICON: Record<ListingOwnerDetail['type'], CatIconKind> = {
   sell: 'sale',
@@ -88,9 +89,9 @@ function ListingStatusContent() {
       <ScreenBar title="Tin của bạn" onBack={goBack} />
 
       {isPending && session ? (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton
+          blocks={['h-[76px] rounded-2xl', 'h-32 rounded-[18px]', 'h-16 rounded-2xl']}
+        />
       ) : null}
       {error ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
 

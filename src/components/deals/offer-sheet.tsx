@@ -2,11 +2,11 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { RadioDot } from '@/components/ui/form-controls';
+import { RadioDot, SkeletonBlock } from '@/components/ui/form-controls';
 import { useAuth } from '@/hooks/useAuth';
 import { useDealActions } from '@/hooks/useDealActions';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -14,6 +14,7 @@ import { CHAT_TEXT_MAX_LENGTH } from '@/services/chat/constants';
 import { priceOfferError, priceSuggestions } from '@/services/deals/offer-rules';
 import { fetchMyItems } from '@/services/stock/items-api';
 import { formatVnd } from '@/utils/format';
+import { SkeletonGroup } from '@/components/ui/skeletons';
 
 export type OfferMode = 'price' | 'buy' | 'swap' | 'gift';
 
@@ -193,7 +194,11 @@ export function OfferSheet({
                 : `${offerable.length} món Sẵn sàng · gần đây`}
             </AppText>
           ) : null}
-          {isPending ? <ActivityIndicator color="#1673D9" /> : null}
+          {isPending ? (
+            <SkeletonGroup>
+              <SkeletonBlock className="h-16 w-full rounded-2xl" />
+            </SkeletonGroup>
+          ) : null}
           {data && offerable.length === 0 ? (
             <AppText className="rounded-xl bg-[#F1F7FE] px-3.5 py-3 text-[14px] text-[#5A6772]">
               {searched

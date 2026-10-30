@@ -8,6 +8,7 @@ import { BarButton, Checkbox } from '@/components/ui/form-controls';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchMyItems, updateMyItem } from '@/services/stock/items-api';
 import { ITEM_PAGE_MAX_SIZE, ITEM_TAGS_MAX_COUNT, ITEM_TAG_MAX_LENGTH } from '@/types/stock';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 type AddTagSheetProps = {
   onClose: () => void;
@@ -88,7 +89,12 @@ export function AddTagSheet({ onClose, onAdded }: AddTagSheetProps) {
           <AppText className="flex-1 text-[15px] font-vn-bold">Gắn cho món nào</AppText>
           <AppText className="text-[12.5px] text-[#5A6772]">{chosen.length} món</AppText>
         </View>
-        {isPending ? <AppText className="text-[13px] text-[#5A6772]">Đang tải…</AppText> : null}
+        {isPending ? (
+          <StackSkeleton
+            className="gap-2"
+            blocks={['h-14 rounded-xl', 'h-14 rounded-xl', 'h-14 rounded-xl']}
+          />
+        ) : null}
         {error ? (
           <AppText accessibilityRole="alert" className="text-[13px] text-[#B42318]">
             {error.message}

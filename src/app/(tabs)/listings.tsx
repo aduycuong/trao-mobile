@@ -29,6 +29,7 @@ import type {
   ListingPillTone,
   ListingSegment,
 } from '@/types/listings';
+import { ListingRowsSkeleton } from '@/components/ui/skeletons';
 
 const SEGMENTS: { id: ListingSegment; label: string }[] = [
   { id: 'draft', label: 'Chờ duyệt' },
@@ -215,11 +216,7 @@ export default function ListingsTab() {
         </ScrollView>
 
         {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? (
-          <View className="items-center py-10">
-            <ActivityIndicator color="#1673D9" />
-          </View>
-        ) : null}
+        {isPending && session ? <ListingRowsSkeleton /> : null}
 
         {first && rows.length === 0 ? (
           <View className="items-center gap-2.5 px-8 pt-12">

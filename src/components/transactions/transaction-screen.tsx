@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConfirmSheet } from '@/components/me/confirm-sheet';
 import { ScreenBar } from '@/components/navigation/screen-bar';
@@ -22,6 +22,7 @@ import {
   progressSteps,
 } from '@/services/transactions/transaction-rules';
 import { formatDayMonth } from '@/utils/format';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /**
  * Chi tiết giao dịch (canvas Chat, chi tiết thoả thuận): the item, the terms, the five steps, and
@@ -52,9 +53,7 @@ export function TransactionScreen({ transactionId }: { transactionId: string }) 
     return (
       <View className="flex-1 bg-white">
         <ScreenBar title="Chi tiết giao dịch" onBack={goBack} />
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-24 rounded-2xl', 'h-40 rounded-2xl']} />
       </View>
     );
   }

@@ -6,6 +6,7 @@ import { MarkdownContent } from '@/components/help/markdown-content';
 import { ScreenBar } from '@/components/navigation/screen-bar';
 import { AppText } from '@/components/ui/app-text';
 import { fetchFaq } from '@/services/help/help-api';
+import { PolicySkeleton } from '@/components/ui/skeletons';
 
 /** One FAQ with its answer (Markdown). Open to guests. */
 export default function FaqScreen() {
@@ -26,9 +27,7 @@ export default function FaqScreen() {
     <View className="flex-1 bg-white">
       <ScreenBar title="Câu hỏi thường gặp" onBack={back} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="px-5 pb-8 pt-2">
-        {isPending ? (
-          <AppText className="py-6 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
-        ) : null}
+        {isPending ? <PolicySkeleton /> : null}
         {error ? (
           <View accessibilityRole="alert" className="mt-2 rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>

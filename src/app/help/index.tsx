@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
 import { fetchHelpHome, HELP_HOME_QUERY_KEY, searchHelp } from '@/services/help/help-api';
+import { HelpSearchSkeleton, HelpSkeleton } from '@/components/ui/skeletons';
 
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_MAX_LENGTH = 100;
@@ -115,11 +116,7 @@ export default function HelpScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="gap-5 px-4 pb-6 pt-3.5"
       >
-        {isPending ? (
-          <View className="items-center py-10">
-            <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
-          </View>
-        ) : null}
+        {isPending ? <HelpSkeleton /> : null}
         {error ? (
           <View accessibilityRole="alert" className="rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>
@@ -161,9 +158,7 @@ export default function HelpScreen() {
 
             {searching ? (
               <View accessibilityLiveRegion="polite">
-                {search.isFetching && !results ? (
-                  <AppText className="py-4 text-[14px] text-[#5A6772]">Đang tìm…</AppText>
-                ) : null}
+                {search.isFetching && !results ? <HelpSearchSkeleton /> : null}
                 {results && results.faqs.length + results.pages.length === 0 ? (
                   <AppText className="py-4 text-[14px] leading-[21px] text-[#5A6772]">
                     Không tìm thấy kết quả cho “{debounced}”. Thử từ khoá khác, hoặc nhắn đội Trao

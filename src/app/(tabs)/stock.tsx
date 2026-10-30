@@ -32,6 +32,7 @@ import { useItemMediaSignal } from '@/hooks/useItemMediaSignal';
 import { fetchMyItems, MY_ITEMS_QUERY_KEY } from '@/services/stock/items-api';
 import type { ItemListRow } from '@/types/stock';
 import { getAsyncStorage } from '@/utils/async-storage';
+import { StockRowsSkeleton } from '@/components/ui/skeletons';
 
 const INTRO_HIDDEN_KEY = 'trao.stock-intro-hidden';
 /** While a photo or video of an item is being checked, the list is read again at this pace. */
@@ -169,11 +170,7 @@ export default function StockTab() {
         ) : null}
 
         {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? (
-          <View className="items-center py-10">
-            <ActivityIndicator color="#1673D9" />
-          </View>
-        ) : null}
+        {isPending && session ? <StockRowsSkeleton /> : null}
 
         {first && allCount > 0 && !introHidden && !filtered ? (
           <View className="relative mx-4 mb-1.5 mt-1 flex-row gap-3 rounded-2xl bg-[#F1F7FE] py-3 pl-3 pr-10">

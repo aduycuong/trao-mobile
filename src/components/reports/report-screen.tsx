@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -35,6 +34,7 @@ import {
   reportNote,
 } from '@/services/reports/report-rules';
 import type { ReportTarget, ReportTargetType } from '@/types/reports';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /**
  * Báo cáo (canvas Report): reason, then what happened with photos, then "Đã gửi báo cáo" with the
@@ -56,9 +56,7 @@ export function ReportScreen({ type, id }: { type: ReportTargetType; id: string 
       <View className="flex-1 bg-white">
         <ReportBar title="Báo cáo" icon="close" onBack={goBack} />
         {isPending ? (
-          <View className="items-center py-10">
-            <ActivityIndicator color="#1673D9" />
-          </View>
+          <StackSkeleton blocks={['h-[80px] rounded-2xl', 'h-52 rounded-2xl']} />
         ) : (
           <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">

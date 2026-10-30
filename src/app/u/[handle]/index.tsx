@@ -19,6 +19,11 @@ import { useSetFollowingInCache, useUserListings, useUserProfile } from '@/hooks
 import { fetchUserReviews, setBlocked } from '@/services/profile/people-api';
 import type { ListingType, PublicProfile, ReviewerRole } from '@/types/people';
 import { ACTIVITY_LEVEL_LABELS, formatWarning } from '@/utils/format';
+import {
+  CardGridSkeleton,
+  ProfileReviewsSkeleton,
+  ProfileSkeleton,
+} from '@/components/ui/skeletons';
 
 const STAR_PATH = 'M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z';
 
@@ -319,7 +324,11 @@ export default function ProfileScreen() {
   const footer = profile ? (
     <View className="px-4 pb-6 pt-2">
       {active.isPending ? (
-        <AppText className="py-6 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
+        tab === 'listings' ? (
+          <CardGridSkeleton />
+        ) : (
+          <ProfileReviewsSkeleton />
+        )
       ) : null}
       {active.error ? (
         <View accessibilityRole="alert" className="rounded-2xl bg-[#FDECEA] px-4 py-3">
@@ -376,9 +385,7 @@ export default function ProfileScreen() {
         }
       />
 
-      {profileQuery.isPending ? (
-        <AppText className="py-10 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
-      ) : null}
+      {profileQuery.isPending ? <ProfileSkeleton /> : null}
       {profileQuery.error ? (
         <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
           <AppText className="text-[14px] text-[#B42318]">{profileQuery.error.message}</AppText>

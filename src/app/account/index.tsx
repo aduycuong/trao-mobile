@@ -29,6 +29,7 @@ import {
   type SocialProvider,
 } from '@/services/social-auth';
 import { MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
+import { AccountSkeleton } from '@/components/ui/skeletons';
 
 type TagTone = 'ok' | 'need' | 'plain';
 
@@ -271,11 +272,7 @@ export default function AccountScreen() {
           <RefreshControl refreshing={isRefetching && !isPending} onRefresh={() => refetch()} />
         }
       >
-        {isPending ? (
-          <View className="items-center py-10">
-            <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
-          </View>
-        ) : null}
+        {isPending ? <AccountSkeleton /> : null}
         {error ? (
           <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>
