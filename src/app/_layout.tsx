@@ -6,7 +6,14 @@ import {
   useFonts,
 } from '@expo-google-fonts/be-vietnam-pro';
 import { Stack } from 'expo-router';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { AppProviders } from '@/providers';
+
+/** Push registration and tap routing; rendered inside the providers and the router. */
+function PushEffects() {
+  usePushNotifications();
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -21,6 +28,7 @@ export default function RootLayout() {
 
   return (
     <AppProviders>
+      <PushEffects />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="auth-gate" options={{ presentation: 'modal' }} />

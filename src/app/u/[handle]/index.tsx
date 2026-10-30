@@ -14,6 +14,7 @@ import { ReviewRow, ReviewsHeader } from '@/components/profile/review-parts';
 import { TypeChips } from '@/components/profile/type-chips';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
+import { useOpenChat } from '@/hooks/useOpenChat';
 import { useSetFollowingInCache, useUserListings, useUserProfile } from '@/hooks/useUserProfile';
 import { fetchUserReviews, setBlocked } from '@/services/profile/people-api';
 import type { ListingType, PublicProfile, ReviewerRole } from '@/types/people';
@@ -203,6 +204,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { session, getIdToken } = useAuth();
+  const openChat = useOpenChat();
   const [tab, setTab] = useState<Tab>('listings');
   const [type, setType] = useState<ListingType | undefined>(undefined);
   const [role, setRole] = useState<ReviewerRole | undefined>(undefined);
@@ -269,7 +271,7 @@ export default function ProfileScreen() {
       <Header
         profile={profile}
         onFollowed={setFollowingInCache}
-        onMessage={() => Alert.alert('Nhắn tin', 'Nhắn tin từ hồ sơ sẽ có trong bản sau.')}
+        onMessage={() => void openChat(profile.handle)}
       />
       <View
         accessibilityRole="tablist"
