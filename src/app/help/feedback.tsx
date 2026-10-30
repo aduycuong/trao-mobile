@@ -22,6 +22,9 @@ import { pickScreenshots, uploadScreenshot } from '@/services/help/feedback-uplo
 import { HELP_HOME_QUERY_KEY, postFeedback } from '@/services/help/help-api';
 import type { FeedbackKind } from '@/types/help';
 
+/** Screenshot tile and the add button: exact points (the web `h-24 w-16`), not rem classes. */
+const SHOT_SIZE = { width: 64, height: 96 } as const;
+
 const BODY_MAX_LENGTH = 2000;
 const MAX_SCREENSHOTS = 3;
 
@@ -244,11 +247,11 @@ export default function FeedbackScreen() {
           </AppText>
           <View className="flex-row gap-2">
             {screenshots.map((uri, index) => (
-              <View key={uri} className="h-24 w-16">
+              <View key={uri} style={SHOT_SIZE}>
                 <Image
                   source={{ uri }}
                   accessibilityLabel={`Ảnh chụp màn hình ${index + 1}`}
-                  style={{ width: 64, height: 96, borderRadius: 10 }}
+                  style={{ ...SHOT_SIZE, borderRadius: 10 }}
                   contentFit="cover"
                 />
                 <Pressable
@@ -279,8 +282,13 @@ export default function FeedbackScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Thêm ảnh"
                 onPress={addScreenshots}
-                className="h-24 w-16 items-center justify-center rounded-[10px] bg-[#F7FBFF]"
-                style={{ borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#9CC3F0' }}
+                className="items-center justify-center rounded-[10px] bg-[#F7FBFF]"
+                style={{
+                  ...SHOT_SIZE,
+                  borderWidth: 1.5,
+                  borderStyle: 'dashed',
+                  borderColor: '#9CC3F0',
+                }}
               >
                 <Svg
                   width={22}
