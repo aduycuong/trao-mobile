@@ -497,9 +497,9 @@ export class ChatSyncEngine {
     await this.store.applyBatch({ pts: null, dialogs: [], messages: [message] });
   }
 
-  /** Opens (or creates) the direct chat with a friend and syncs it in. */
-  async openDirectChat(friendUserId: string): Promise<string> {
-    const { inboxId } = await this.api.getOrCreateDirectInbox(friendUserId);
+  /** Opens (or creates) the direct chat with a user, given by id or profile handle. */
+  async openDirectChat(other: { otherUserId: string } | { handle: string }): Promise<string> {
+    const { inboxId } = await this.api.getOrCreateDirectInbox(other);
     return inboxId;
   }
 

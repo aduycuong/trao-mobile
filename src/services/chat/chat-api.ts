@@ -13,8 +13,6 @@ import type {
   GetHistoryResult,
   GetOrCreateDirectInboxResult,
   GetPendingMediaUploadUrlsResult,
-  ListChatStickersResult,
-  ListFriendsResult,
   MarkInboxReadResult,
   SendMessageResult,
   SetChatMessageReactionResult,
@@ -59,12 +57,6 @@ export function createChatApi(getToken: () => Promise<string>) {
         replyToId,
       }),
 
-    /** Chat sticker groups and the stickers of one group (the first one when omitted). */
-    listChatStickers: (groupId?: string) =>
-      request<ListChatStickersResult>(
-        `/api/chat/stickers${groupId ? `?groupId=${encodeURIComponent(groupId)}` : ''}`
-      ),
-
     /** `emoji: null` removes the user's reaction. */
     setReaction: (inboxId: string, messageId: string, emoji: string | null) =>
       request<SetChatMessageReactionResult>(
@@ -106,16 +98,12 @@ export function createChatApi(getToken: () => Promise<string>) {
     markRead: (inboxId: string, seq: number) =>
       request<MarkInboxReadResult>(`/api/chat/inboxes/${inboxId}/read`, { seq }),
 
-    getOrCreateDirectInbox: (friendUserId: string) =>
-      request<GetOrCreateDirectInboxResult>('/api/chat/inboxes', {
-        type: 'direct',
-        friendUserId,
-      }),
+    /** The other user by id, or by the handle of their profile link. */
+    getOrCreateDirectInbox: (other: { otherUserId: string } | { handle: string }) =>
+      request<GetOrCreateDirectInboxResult>('/api/chat/inboxes', { type: 'direct', ...other }),
 
     createGroupInbox: (input: { title: string; avatar: string; memberUserIds: string[] }) =>
       request<CreateGroupInboxResult>('/api/chat/inboxes', { type: 'group', ...input }),
-
-    listFriends: () => request<ListFriendsResult>('/api/connections'),
   };
 }
 

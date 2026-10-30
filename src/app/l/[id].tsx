@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
+import { useOpenChat } from '@/hooks/useOpenChat';
 import {
   fetchListingPage,
   listingPageKey,
@@ -96,7 +97,7 @@ function useNow(active: boolean): number {
 
 /**
  * The page of a listing (canvas Detail), for a viewer and for its owner. Open to guests.
- * Likes and comments work; the deal buttons and the report link are drawn but answer "sắp có"
+ * Likes, comments and Nhắn tin work; the deal buttons and the report link are drawn but answer "sắp có"
  * until the deal and report parts are built.
  */
 export default function ListingPageScreen() {
@@ -106,6 +107,7 @@ export default function ListingPageScreen() {
   const queryClient = useQueryClient();
   const goBack = useGoBack('/');
   const { session, getIdToken } = useAuth();
+  const openChat = useOpenChat();
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoHeight, setInfoHeight] = useState(0);
   const [menu, setMenu] = useState(false);
@@ -443,7 +445,11 @@ export default function ListingPageScreen() {
         {!page.isOwner ? (
           <View className="gap-2 px-4 pt-4">
             <View className="flex-row gap-2">
-              <ActionButton outline onPress={() => comingSoon('Nhắn tin')} flex={0}>
+              <ActionButton
+                outline
+                onPress={() => void openChat(page.seller.handle, page.id)}
+                flex={0}
+              >
                 <Svg
                   width={18}
                   height={18}

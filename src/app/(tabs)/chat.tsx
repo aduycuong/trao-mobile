@@ -1,5 +1,5 @@
-import { TabPlaceholder } from '@/components/navigation/tab-placeholder';
+import { ChatListScreen } from '@/components/chat/chat-list-screen';
 
 export default function ChatTab() {
-  return <TabPlaceholder title="Tin nhắn" />;
+  return <ChatListScreen />;
 }

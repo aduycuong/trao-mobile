@@ -36,13 +36,14 @@ export const CHAT_TYPING_EXPIRE_MS = 5000;
  */
 export const CHAT_UNSEND_WINDOW_SECONDS = 48 * 60 * 60;
 
-/** Emoji a user can react with. A user has at most one on a message. */
+/** Emoji a user can react with, in the order of the canvas. A user has at most one on a message, of any kind. */
 export const CHAT_REACTIONS = [
   { emoji: '❤️', label: 'Yêu thích' },
   { emoji: '😂', label: 'Haha' },
   { emoji: '😮', label: 'Ngạc nhiên' },
   { emoji: '😢', label: 'Buồn' },
   { emoji: '👍', label: 'Thích' },
+  { emoji: '🙏', label: 'Cảm ơn' },
 ] as const;
 
 /** Media messages (images only in v1). */
