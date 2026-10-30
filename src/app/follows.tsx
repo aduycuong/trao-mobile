@@ -20,6 +20,18 @@ import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile
 import type { FollowTab, ListFollowPeopleResult } from '@/types/people';
 import { PeopleRowsSkeleton } from '@/components/ui/skeletons';
 
+/** Fixed line heights keep the font's tall metrics from pushing the chip text low. */
+const CHIP_LABEL = {
+  lineHeight: 18,
+  includeFontPadding: false,
+  textAlignVertical: 'center',
+} as const;
+const CHIP_COUNT = {
+  lineHeight: 14,
+  includeFontPadding: false,
+  textAlignVertical: 'center',
+} as const;
+
 const SEARCH_DEBOUNCE_MS = 300;
 
 /** Followers · Following of the signed-in user (canvas People): search by name, follow back at once. */
@@ -86,7 +98,7 @@ export default function FollowsScreen() {
 
   const header = (
     <View>
-      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 pb-2.5 pt-1">
+      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 py-3">
         {(
           [
             ['followers', 'Followers', counts.followers],
@@ -100,11 +112,14 @@ export default function FollowsScreen() {
               accessibilityRole="tab"
               accessibilityState={{ selected: on }}
               onPress={() => setTab(value)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
+              className={`h-[34px] flex-row items-center justify-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
                 on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
               }`}
             >
-              <AppText className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : ''}`}>
+              <AppText
+                className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : ''}`}
+                style={CHIP_LABEL}
+              >
                 {label}
               </AppText>
               <View
@@ -115,6 +130,7 @@ export default function FollowsScreen() {
               >
                 <AppText
                   className={`text-[11px] font-vn-bold ${on ? 'text-white' : 'text-[#33414D]'}`}
+                  style={CHIP_COUNT}
                 >
                   {count}
                 </AppText>
