@@ -1,15 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { CatIcon } from '@/components/icons/cat-icon';
 import { TabHeader } from '@/components/navigation/tab-header';
@@ -18,7 +10,7 @@ import { ItemThumb } from '@/components/stock/item-thumb';
 import { NOTE_STYLE } from '@/components/stock/note-style';
 import { TagChip } from '@/components/stock/tag-chip';
 import { AppText } from '@/components/ui/app-text';
-import { ErrorBox } from '@/components/ui/form-controls';
+import { ErrorBox, SkeletonBlock } from '@/components/ui/form-controls';
 import {
   ICON_CHEVRON_RIGHT,
   ICON_CLOCK,
@@ -32,6 +24,7 @@ import { useItemMediaSignal } from '@/hooks/useItemMediaSignal';
 import { fetchMyItems, MY_ITEMS_QUERY_KEY } from '@/services/stock/items-api';
 import type { ItemListRow } from '@/types/stock';
 import { getAsyncStorage } from '@/utils/async-storage';
+import { StockRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
 
 const INTRO_HIDDEN_KEY = 'trao.stock-intro-hidden';
 /** While a photo or video of an item is being checked, the list is read again at this pace. */
@@ -169,11 +162,7 @@ export default function StockTab() {
         ) : null}
 
         {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? (
-          <View className="items-center py-10">
-            <ActivityIndicator color="#1673D9" />
-          </View>
-        ) : null}
+        {isPending && session ? <StockRowsSkeleton /> : null}
 
         {first && allCount > 0 && !introHidden && !filtered ? (
           <View className="relative mx-4 mb-1.5 mt-1 flex-row gap-3 rounded-2xl bg-[#F1F7FE] py-3 pl-3 pr-10">
@@ -271,7 +260,11 @@ export default function StockTab() {
         ListHeaderComponent={header}
         ListFooterComponent={
           <View className="min-h-24 flex-1 items-center bg-white pt-4">
-            {isFetchingNextPage ? <ActivityIndicator color="#1673D9" /> : null}
+            {isFetchingNextPage ? (
+              <SkeletonGroup className="items-center">
+                <SkeletonBlock className="h-4 w-24" />
+              </SkeletonGroup>
+            ) : null}
           </View>
         }
         contentContainerStyle={{ flexGrow: 1 }}

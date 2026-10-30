@@ -14,6 +14,7 @@ import {
   patchMySettings,
 } from '@/services/account/account-api';
 import type { MySettings, Theme, VideoAutoplay } from '@/types/account';
+import { SettingsSkeleton } from '@/components/ui/skeletons';
 
 const VIDEO_OPTIONS: [VideoAutoplay, string][] = [
   ['always', 'Luôn'],
@@ -198,11 +199,7 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-white">
       <ScreenBar title="Cài đặt" onBack={back} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-5">
-        {isPending ? (
-          <View className="items-center py-10">
-            <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
-          </View>
-        ) : null}
+        {isPending ? <SettingsSkeleton /> : null}
         {error ? (
           <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -42,6 +42,7 @@ import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile
 import type { ListingPageAuction, ListingPageData } from '@/types/listings';
 import type { ListingType } from '@/types/people';
 import { formatClock, formatCountdown, formatDayMonth, formatVnd } from '@/utils/format';
+import { ListingBodySkeleton } from '@/components/ui/skeletons';
 
 type AvailablePage = Extract<ListingPageData, { available: true }>;
 
@@ -254,9 +255,7 @@ export default function ListingPageScreen() {
             </RoundOverlayButton>
           </View>
         </View>
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <ListingBodySkeleton />
       </View>
     );
   }

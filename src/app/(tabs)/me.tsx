@@ -12,6 +12,7 @@ import { UserAvatar } from '@/components/me/user-avatar';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
+import { MeSkeleton } from '@/components/ui/skeletons';
 
 /** The Tôi tab (canvas Main, tab "me"): profile, reputation, rewards, menus, sign out. */
 export default function MeTab() {
@@ -41,11 +42,7 @@ export default function MeTab() {
       >
         <TabHeader />
         <View className="mt-1 flex-1 rounded-t-[26px] bg-white pb-6 pt-[18px]">
-          {isPending ? (
-            <View className="items-center py-10">
-              <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
-            </View>
-          ) : null}
+          {isPending ? <MeSkeleton /> : null}
           {error ? (
             <View accessibilityRole="alert" className="mx-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
               <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>

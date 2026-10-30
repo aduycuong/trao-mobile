@@ -8,6 +8,7 @@ import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
 import { MY_SETTINGS_QUERY_KEY } from '@/services/account/account-api';
 import { fetchBlockedUsers, MY_BLOCKS_QUERY_KEY, setBlocked } from '@/services/profile/people-api';
+import { BlockedRowsSkeleton } from '@/components/ui/skeletons';
 
 /** Người đã chặn (Cài đặt → Quyền riêng tư): the blocked users, each with "Bỏ chặn". */
 export default function BlockedScreen() {
@@ -42,9 +43,7 @@ export default function BlockedScreen() {
     <View className="flex-1 bg-white">
       <ScreenBar title="Người đã chặn" onBack={back} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {isPending ? (
-          <AppText className="py-10 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
-        ) : null}
+        {isPending ? <BlockedRowsSkeleton /> : null}
         {error ? (
           <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
             <AppText className="text-[14px] text-[#B42318]">{error.message}</AppText>

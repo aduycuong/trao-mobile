@@ -59,6 +59,7 @@ import {
   isStartValid,
   type ListingDraft,
 } from '@/utils/listing-rules';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 type Step = 'listing' | 'check' | 'area' | 'done';
 
@@ -314,9 +315,7 @@ export function PostListingFlow({
     return (
       <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
         <StepBar title="Đăng tin" label="" onBack={goBack} />
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-[84px] rounded-2xl', 'h-28 rounded-2xl', 'h-14 rounded-xl']} />
       </View>
     );
   }

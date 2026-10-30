@@ -1,15 +1,7 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
 import { TabIcon } from '@/components/icons/tab-icon';
@@ -17,7 +9,7 @@ import { TabHeader } from '@/components/navigation/tab-header';
 import { PostStartSheet } from '@/components/post/post-start-sheet';
 import { ItemThumb } from '@/components/stock/item-thumb';
 import { AppText } from '@/components/ui/app-text';
-import { ErrorBox } from '@/components/ui/form-controls';
+import { ErrorBox, SkeletonBlock } from '@/components/ui/form-controls';
 import { ICON_PLUS, PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -29,6 +21,7 @@ import type {
   ListingPillTone,
   ListingSegment,
 } from '@/types/listings';
+import { ListingRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
 
 const SEGMENTS: { id: ListingSegment; label: string }[] = [
   { id: 'draft', label: 'Chờ duyệt' },
@@ -215,11 +208,7 @@ export default function ListingsTab() {
         </ScrollView>
 
         {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? (
-          <View className="items-center py-10">
-            <ActivityIndicator color="#1673D9" />
-          </View>
-        ) : null}
+        {isPending && session ? <ListingRowsSkeleton /> : null}
 
         {first && rows.length === 0 ? (
           <View className="items-center gap-2.5 px-8 pt-12">
@@ -259,7 +248,11 @@ export default function ListingsTab() {
         ListHeaderComponent={header}
         ListFooterComponent={
           <View className="min-h-24 flex-1 items-center bg-white pt-4">
-            {isFetchingNextPage ? <ActivityIndicator color="#1673D9" /> : null}
+            {isFetchingNextPage ? (
+              <SkeletonGroup className="items-center">
+                <SkeletonBlock className="h-4 w-24" />
+              </SkeletonGroup>
+            ) : null}
           </View>
         }
         contentContainerStyle={{ flexGrow: 1 }}

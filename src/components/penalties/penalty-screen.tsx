@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -33,6 +32,7 @@ import {
 import { APPEAL_REASON_MAX_LENGTH } from '@/services/reports/report-rules';
 import type { PenaltyDetail } from '@/types/penalties';
 import { formatDayMonth, formatEventTime, formatUpdatedDate } from '@/utils/format';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 type View_ = 'notice' | 'appeal' | 'sent';
 
@@ -62,9 +62,7 @@ export function PenaltyScreen({ penaltyId }: { penaltyId: string }) {
         onBack={view === 'appeal' ? () => setView('notice') : goBack}
       />
       {isPending ? (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-24 rounded-2xl', 'h-32 rounded-2xl']} />
       ) : error || !data ? (
         <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
           <AppText className="text-[14px] text-[#B42318]">

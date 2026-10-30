@@ -133,7 +133,7 @@ export function ErrorBox({
   );
 }
 
-/** Placeholder block while a screen loads. */
+/** Placeholder block while a screen loads (the web `Skeleton`: #E8EEF4, 6px radius). */
 export function SkeletonBlock({ className = '' }: { className?: string }) {
-  return <View className={`rounded-lg bg-[#EEF2F6] ${className}`} />;
+  return <View className={`rounded-md bg-[#E8EEF4] ${className}`} />;
 }

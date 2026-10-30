@@ -1,13 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchAuctionBoard } from '@/services/auctions/auctions-api';
 import { subscribeAuctionSignal } from '@/services/chat/rtdb';
 import { formatVnd } from '@/utils/format';
+import { SkeletonBlock } from '@/components/ui/form-controls';
+import { SkeletonGroup } from '@/components/ui/skeletons';
 
 const STATUS: Record<string, { label: string; dot: string }> = {
   scheduled: { label: 'Chưa bắt đầu', dot: '#8A96A3' },
@@ -93,9 +95,9 @@ export function AuctionBoard({ listingId, endsAt }: { listingId: string; endsAt:
       </LinearGradient>
 
       {isPending ? (
-        <View className="items-center pb-4">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <SkeletonGroup className="px-3.5 pb-3.5">
+          <SkeletonBlock className="h-24 rounded-2xl" />
+        </SkeletonGroup>
       ) : null}
 
       {data && data.entries.length === 0 ? (

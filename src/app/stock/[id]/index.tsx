@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { CATEGORY_ICON_BY_SLUG, CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
@@ -45,6 +45,7 @@ import {
 } from '@/types/stock';
 import { formatDayMonth, formatEventTime } from '@/utils/format';
 import { RequireSession } from '@/components/auth/require-session';
+import { ItemBodySkeleton } from '@/components/ui/skeletons';
 
 const STATUS_STYLE: Record<
   ItemStatus | 'live',
@@ -152,9 +153,7 @@ function StockItemContent() {
             </RoundOverlayButton>
           </View>
         </View>
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <ItemBodySkeleton />
       </View>
     );
   }

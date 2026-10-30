@@ -17,6 +17,7 @@ import { fetchMyItems } from '@/services/stock/items-api';
 import { LISTING_TYPES } from '@/types/people';
 import { canPostAlongside } from '@/utils/listing-rules';
 import { RequireSession } from '@/components/auth/require-session';
+import { PickRowsSkeleton } from '@/components/ui/skeletons';
 
 /** "Chọn món để đăng" (canvas Post, step "pick"): items of Kho đồ to post. */
 function PostPickContent() {
@@ -66,11 +67,7 @@ function PostPickContent() {
       </View>
 
       {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-      {isPending && session ? (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
-      ) : null}
+      {isPending && session ? <PickRowsSkeleton /> : null}
       {data && rows.length === 0 ? (
         <View className="items-center gap-3 px-8 pt-12">
           <AppText className="text-center text-[14px] leading-[21.7px] text-[#5A6772]">

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { ActionBar } from '@/components/reports/action-bar';
 import { EvidencePicker } from '@/components/reports/evidence-picker';
 import { ReportBar } from '@/components/reports/report-bar';
@@ -20,6 +20,7 @@ import {
 import { addReportEvidenceRequest, fetchReport, reportKey } from '@/services/reports/reports-api';
 import type { ReportDetail } from '@/types/reports';
 import { formatDayMonth } from '@/utils/format';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /** Theo dõi báo cáo (canvas Report, step "status"): where it stands, the result, what was sent. */
 export function ReportStatusScreen({ reportId }: { reportId: string }) {
@@ -39,9 +40,7 @@ export function ReportStatusScreen({ reportId }: { reportId: string }) {
       <ReportBar title={data ? `Báo cáo #${data.code}` : 'Báo cáo'} icon="close" onBack={goBack} />
 
       {isPending ? (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-[80px] rounded-2xl', 'h-40 rounded-2xl']} />
       ) : error || !data ? (
         <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
           <AppText className="text-[14px] text-[#B42318]">

@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { subscribePhoneVerifiedSignal } from '@/services/chat/rtdb';
 import { fetchPhoneVerification, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { PhoneVerifiedSignal } from '@/types/profile';
+import { PhoneVerifySkeleton } from '@/components/ui/skeletons';
 
 /** Must match the server's code lifetime. */
 const PHONE_CODE_TTL_SECONDS = 60;
@@ -348,9 +349,7 @@ export default function VerifyPhoneScreen() {
             </View>
           </>
         ) : null}
-        {!data && !error ? (
-          <AppText className="py-8 text-center text-[14px] text-[#5A6772]">Đang tạo mã…</AppText>
-        ) : null}
+        {!data && !error ? <PhoneVerifySkeleton /> : null}
       </ScrollView>
 
       {data && !data.verified ? (

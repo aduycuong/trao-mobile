@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PostListingFlow } from '@/components/post/post-listing-flow';
 import { AppText } from '@/components/ui/app-text';
@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { fetchMyListing, listingQueryKey } from '@/services/listings/listings-api';
 import { RequireSession } from '@/components/auth/require-session';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /**
  * Edit a listing, send a rejected one again, or post a closed one again: the Đăng tin steps with
@@ -33,8 +34,8 @@ function EditListingContent() {
 
   if (isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator color="#1673D9" />
+      <View className="flex-1 bg-white">
+        <StackSkeleton blocks={['h-[84px] rounded-2xl', 'h-28 rounded-2xl', 'h-14 rounded-xl']} />
       </View>
     );
   }

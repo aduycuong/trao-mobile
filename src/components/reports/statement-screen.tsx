@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +18,7 @@ import { useEvidence } from '@/hooks/useEvidence';
 import { useGoBack } from '@/hooks/useGoBack';
 import { caseKey, fetchMyCase, submitStatementRequest } from '@/services/cases/cases-api';
 import { CASE_TEXT_MAX_LENGTH } from '@/services/reports/report-rules';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /**
  * Giải trình: Trao asks one side of a case for their account before deciding. No canvas artboard
@@ -59,11 +59,7 @@ export function StatementScreen({ caseId }: { caseId: string }) {
 
   let body: React.ReactNode;
   if (isPending) {
-    body = (
-      <View className="items-center py-10">
-        <ActivityIndicator color="#1673D9" />
-      </View>
-    );
+    body = <StackSkeleton blocks={['h-24 rounded-2xl', 'h-32 rounded-2xl']} />;
   } else if (error || !data) {
     body = (
       <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">

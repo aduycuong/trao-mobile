@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Redirect } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { ScreenBar } from '@/components/navigation/screen-bar';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { fetchActiveCard } from '@/services/penalties/penalties-api';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 /**
  * `/penalty`: opens the card the user is under now. With none (the web goes back to Tôi), the
@@ -48,9 +49,7 @@ export function CurrentPenaltyRedirect() {
           </AppText>
         </View>
       ) : (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-24 rounded-2xl']} />
       )}
     </View>
   );

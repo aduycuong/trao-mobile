@@ -2,7 +2,6 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
@@ -33,6 +32,7 @@ import {
   unhideFeedItem,
 } from '@/services/feed/feed-api';
 import type { FeedCard, FeedStripId } from '@/types/feed';
+import { CardGridSkeleton } from '@/components/ui/skeletons';
 
 const STRIP_ICON: Record<FeedStripId, CatIconKind> = {
   suggested: 'sale',
@@ -318,7 +318,7 @@ export function HomeScreen() {
         ListFooterComponent={
           <View className="min-h-40 bg-white px-8 pt-4">
             {latest.isFetchingNextPage || (latest.isPending && !!excludeIds) ? (
-              <ActivityIndicator color="#1673D9" />
+              <CardGridSkeleton count={2} />
             ) : null}
             {finished ? (
               <AppText className="pt-2 text-center text-[13px] text-[#5A6772]">

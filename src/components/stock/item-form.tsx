@@ -4,7 +4,6 @@ import { randomUUID } from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -56,6 +55,7 @@ import {
 import { formatClipDuration } from '@/utils/format';
 import { planPicks } from '@/utils/media-rules';
 import { sameMedia, tilesOf, type Tile } from '@/utils/item-form';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 const PLACEHOLDER =
   'Ví dụ: iPhone 13 128GB xanh, mua 2022, pin 89%, xước nhẹ cạnh dưới, kèm ốp và cáp. Mua dịp tốt nghiệp, giờ đổi máy nên bán lại.';
@@ -92,9 +92,7 @@ export function ItemForm({ itemId, flow }: ItemFormProps) {
     return (
       <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
         <FormBar title="Chỉnh sửa" onClose={goBack} />
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-28 rounded-[14px]', 'h-10', 'h-36 rounded-[14px]']} />
       </View>
     );
   }

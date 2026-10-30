@@ -18,6 +18,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { fetchFollowPeople, MY_FOLLOWS_QUERY_KEY } from '@/services/profile/people-api';
 import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { FollowTab, ListFollowPeopleResult } from '@/types/people';
+import { PeopleRowsSkeleton } from '@/components/ui/skeletons';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -205,9 +206,7 @@ export default function FollowsScreen() {
         )}
         ListFooterComponent={
           <View>
-            {list.isPending ? (
-              <AppText className="py-6 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
-            ) : null}
+            {list.isPending ? <PeopleRowsSkeleton /> : null}
             {list.error ? (
               <View accessibilityRole="alert" className="m-4 rounded-2xl bg-[#FDECEA] px-4 py-3">
                 <AppText className="text-[14px] text-[#B42318]">{list.error.message}</AppText>

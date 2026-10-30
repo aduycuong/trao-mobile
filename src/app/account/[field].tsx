@@ -15,6 +15,7 @@ import {
 import { MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { MyAccount } from '@/types/account';
 import { BIO_MAX_LENGTH, validateTextField, type TextField } from '@/utils/account-validation';
+import { FieldSkeleton } from '@/components/ui/skeletons';
 
 const FIELDS: Record<
   TextField,
@@ -117,9 +118,7 @@ function TextEdit({ field }: { field: TextField }) {
     >
       <ScreenBar title={config.title} onBack={back} />
       {isPending || !account ? (
-        <View className="items-center py-10">
-          <AppText className="text-[14px] text-[#5A6772]">Đang tải…</AppText>
-        </View>
+        <FieldSkeleton tall={field === 'bio'} />
       ) : (
         <>
           <View className="flex-1 gap-3 px-5 pt-5">

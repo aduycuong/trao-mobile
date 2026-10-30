@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { CoinIcon } from '@/components/icons/coin-icon';
@@ -28,6 +28,7 @@ import {
 import { DEAL_TYPE_LABEL } from '@/services/deals/deal-banner';
 import type { ReviewContext } from '@/types/deals';
 import { formatDayMonth } from '@/utils/format';
+import { StackSkeleton } from '@/components/ui/skeletons';
 
 function Star({ on, size }: { on: boolean; size: number }) {
   return (
@@ -79,9 +80,7 @@ export function ReviewScreen({ transactionId }: { transactionId: string }) {
       </View>
 
       {isPending ? (
-        <View className="items-center py-10">
-          <ActivityIndicator color="#1673D9" />
-        </View>
+        <StackSkeleton blocks={['h-[84px] rounded-2xl', 'h-40 rounded-2xl']} />
       ) : error || !data ? (
         <ErrorBox
           message={error?.message ?? 'Không mở được màn đánh giá.'}

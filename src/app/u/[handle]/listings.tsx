@@ -10,6 +10,7 @@ import { AppText } from '@/components/ui/app-text';
 import { useSetFollowingInCache, useUserListings, useUserProfile } from '@/hooks/useUserProfile';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ListingType } from '@/types/people';
+import { CardGridSkeleton } from '@/components/ui/skeletons';
 
 /** Listings of one person (canvas UserListings): opened from a follower or following row. */
 export default function UserListingsScreen() {
@@ -130,9 +131,7 @@ export default function UserListingsScreen() {
           ListHeaderComponent={header}
           ListFooterComponent={
             <View className="px-4 pb-6 pt-2">
-              {listings.isPending ? (
-                <AppText className="py-6 text-center text-[14px] text-[#5A6772]">Đang tải…</AppText>
-              ) : null}
+              {listings.isPending ? <CardGridSkeleton /> : null}
               {listings.error ? (
                 <Pressable onPress={() => listings.refetch()}>
                   <AppText className="py-4 text-center text-[14px] font-vn-semibold text-[#B42318] underline">
