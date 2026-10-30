@@ -23,7 +23,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { fetchDeals } from '@/services/deals/deals-api';
 import { useGoBack } from '@/hooks/useGoBack';
-import { usePostGuard } from '@/hooks/usePostGuard';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import {
   deleteMyItem,
   fetchMyItem,
@@ -80,7 +80,7 @@ function StockItemContent() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { session, getIdToken } = useAuth();
-  const guardPost = usePostGuard();
+  const postGuard = usePenaltyGuard();
   const goBack = useGoBack('/stock');
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -172,7 +172,7 @@ function StockItemContent() {
   const status = STATUS_STYLE[statusKey];
 
   function startPosting() {
-    if (!guardPost()) return;
+    if (!postGuard.guard('post')) return;
     router.push({ pathname: '/stock/[id]/post', params: { id: item!.id, from: 'stock' } });
   }
 
@@ -594,6 +594,7 @@ function StockItemContent() {
           </View>
         </BottomSheet>
       ) : null}
+      {postGuard.sheet}
     </View>
   );
 }

@@ -23,7 +23,7 @@ import { AppText } from '@/components/ui/app-text';
 import { ErrorBox, SkeletonBlock } from '@/components/ui/form-controls';
 import { ICON_CHEVRON_RIGHT, ICON_PLUS, PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
-import { usePostGuard } from '@/hooks/usePostGuard';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import {
   fetchHomeFeed,
   fetchLatestFeed,
@@ -66,7 +66,7 @@ export function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { session, status, getIdToken } = useAuth();
-  const guardPost = usePostGuard();
+  const postGuard = usePenaltyGuard();
   const { width } = useWindowDimensions();
   const now = useNow();
   const uid = session?.uid ?? null;
@@ -186,7 +186,7 @@ export function HomeScreen() {
       router.push('/auth-gate');
       return;
     }
-    if (guardPost()) setPosting(true);
+    if (postGuard.guard('post')) setPosting(true);
   }
 
   const failed = (home.error && !home.data) || (latest.error && !latest.data);
@@ -376,9 +376,16 @@ export function HomeScreen() {
           card={menuFor}
           onClose={() => setMenuFor(null)}
           onHide={(kind) => void hide(menuFor, kind)}
+          onReport={() => {
+            const listingId = menuFor.id;
+            setMenuFor(null);
+            if (!session) router.push('/auth-gate');
+            else router.push({ pathname: '/report', params: { type: 'listing', id: listingId } });
+          }}
         />
       ) : null}
       {posting ? <PostStartSheet onClose={() => setPosting(false)} /> : null}
+      {postGuard.sheet}
     </View>
   );
 }

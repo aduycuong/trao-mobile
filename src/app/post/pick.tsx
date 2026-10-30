@@ -12,7 +12,7 @@ import { PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGoBack } from '@/hooks/useGoBack';
-import { usePostGuard } from '@/hooks/usePostGuard';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import { fetchMyItems } from '@/services/stock/items-api';
 import { LISTING_TYPES } from '@/types/people';
 import { canPostAlongside } from '@/utils/listing-rules';
@@ -22,7 +22,7 @@ import { RequireSession } from '@/components/auth/require-session';
 function PostPickContent() {
   const router = useRouter();
   const goBack = useGoBack('/listings');
-  const guardPost = usePostGuard();
+  const postGuard = usePenaltyGuard();
   const { session, getIdToken } = useAuth();
   const [text, setText] = useState('');
   const keyword = useDebounce(text.trim(), 300);
@@ -116,7 +116,7 @@ function PostPickContent() {
                 accessibilityState={{ disabled: !pickable }}
                 disabled={!pickable}
                 onPress={() => {
-                  if (!guardPost()) return;
+                  if (!postGuard.guard('post')) return;
                   router.push({
                     pathname: '/stock/[id]/post',
                     params: { id: row.id, from: 'stock' },
@@ -157,6 +157,7 @@ function PostPickContent() {
           );
         }}
       />
+      {postGuard.sheet}
     </View>
   );
 }
