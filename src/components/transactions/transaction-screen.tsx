@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConfirmSheet } from '@/components/me/confirm-sheet';
 import { ScreenBar } from '@/components/navigation/screen-bar';
@@ -23,11 +23,6 @@ import {
 } from '@/services/transactions/transaction-rules';
 import { formatDayMonth } from '@/utils/format';
 
-/** The report flow belongs to part 8: the buttons are drawn and answer "sắp có". */
-function reportSoon() {
-  Alert.alert('Báo cáo', 'Tính năng này sắp có.');
-}
-
 /**
  * Chi tiết giao dịch (canvas Chat, chi tiết thoả thuận): the item, the terms, the five steps, and
  * what each side can do.
@@ -47,6 +42,11 @@ export function TransactionScreen({ transactionId }: { transactionId: string }) 
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [policy, setPolicy] = useState(false);
+
+  /** Báo cáo: the box of a deal the other side cancelled and the "Khiếu nại" link. */
+  function reportTransaction() {
+    router.push({ pathname: '/report', params: { type: 'transaction', id: transactionId } });
+  }
 
   if (isPending) {
     return (
@@ -113,7 +113,7 @@ export function TransactionScreen({ transactionId }: { transactionId: string }) 
             </AppText>
             <Pressable
               accessibilityRole="button"
-              onPress={reportSoon}
+              onPress={reportTransaction}
               className="h-10 justify-center self-start rounded-[11px] border-[1.5px] border-[#B42318] bg-white px-4"
             >
               <AppText className="text-[14px] font-vn-bold text-[#B42318]">Báo cáo</AppText>
@@ -226,7 +226,7 @@ export function TransactionScreen({ transactionId }: { transactionId: string }) 
         </View>
 
         <View className="flex-row gap-4">
-          <Pressable accessibilityRole="button" onPress={reportSoon}>
+          <Pressable accessibilityRole="button" onPress={reportTransaction}>
             <AppText className="text-[13px] text-[#5A6772]">Khiếu nại</AppText>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={() => setPolicy(true)} className="ml-auto">

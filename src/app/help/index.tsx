@@ -280,17 +280,26 @@ export default function HelpScreen() {
                     <AppText accessibilityRole="header" className="mb-1 text-[15px] font-vn-bold">
                       Của bạn
                     </AppText>
-                    {/* Reports and cards are part 8 of the plan; they only show a label until then. */}
-                    {['Báo cáo của tôi', 'Thẻ phạt và kiến nghị'].map((label) => (
-                      <View
-                        key={label}
-                        className="min-h-14 flex-row items-center gap-2.5 border-b border-[#F2F5F8] py-2"
-                        style={{ opacity: 0.55 }}
-                      >
-                        <AppText className="flex-1 text-[14.5px] font-vn-medium">{label}</AppText>
-                        <AppText className="text-[13px] text-[#5A6772]">Sắp có</AppText>
-                      </View>
-                    ))}
+                    {/* The server has no list of a user's reports yet (same on the web), so the row waits. */}
+                    <View
+                      className="min-h-14 flex-row items-center gap-2.5 border-b border-[#F2F5F8] py-2"
+                      style={{ opacity: 0.55 }}
+                    >
+                      <AppText className="flex-1 text-[14.5px] font-vn-medium">
+                        Báo cáo của tôi
+                      </AppText>
+                      <AppText className="text-[13px] text-[#5A6772]">Sắp có</AppText>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => router.push('/penalty')}
+                      className="min-h-14 flex-row items-center gap-2.5 border-b border-[#F2F5F8] py-2"
+                    >
+                      <AppText className="flex-1 text-[14.5px] font-vn-medium">
+                        Thẻ phạt và kiến nghị
+                      </AppText>
+                      <Chevron />
+                    </Pressable>
                     <View className="min-h-14 justify-center gap-0.5 border-b border-[#F2F5F8] py-2">
                       <AppText className="text-[14.5px] font-vn-medium">Góp ý đã gửi</AppText>
                       <AppText className="text-[12.5px] text-[#5A6772]">

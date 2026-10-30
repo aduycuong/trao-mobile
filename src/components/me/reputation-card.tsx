@@ -33,7 +33,15 @@ function VerifiedTick({ size, width }: { size: number; width: number }) {
 
 export { VerifiedTick };
 
-type Level = { label: string; value: string; verified?: boolean; note?: string; color?: string };
+type Level = {
+  label: string;
+  value: string;
+  verified?: boolean;
+  note?: string;
+  color?: string;
+  /** The row opens this screen when tapped. */
+  href?: '/penalty';
+};
 
 /** "Uy tín" card of the Tôi tab: rating, counters, the four levels, phone reminder. */
 export function ReputationCard({ profile }: { profile: MyProfile }) {
@@ -53,6 +61,7 @@ export function ReputationCard({ profile }: { profile: MyProfile }) {
       label: 'Cảnh báo',
       value: formatWarning(profile.warning),
       color: profile.warning ? (profile.warning.kind === 'red' ? '#B42318' : '#8A5A00') : undefined,
+      href: profile.warning ? '/penalty' : undefined,
     },
   ];
 
@@ -91,28 +100,43 @@ export function ReputationCard({ profile }: { profile: MyProfile }) {
       </View>
 
       <View className="rounded-xl bg-white px-3 py-1">
-        {levels.map((level, index) => (
-          <View
-            key={level.label}
-            className={`min-h-10 flex-row items-center justify-between gap-2.5 ${
-              index ? 'border-t border-[#EEF2F6]' : ''
-            }`}
-          >
-            <AppText className="text-[13px] text-[#5A6772]">{level.label}</AppText>
-            <View className="flex-row items-center gap-1.5">
-              {level.verified ? <VerifiedTick size={15} width={2.6} /> : null}
-              <AppText
-                className="text-[13.5px] font-vn-semibold"
-                style={level.color ? { color: level.color } : undefined}
-              >
-                {level.value}
-                {level.note ? (
-                  <AppText className="text-[13.5px] text-[#5A6772]"> · {level.note}</AppText>
-                ) : null}
-              </AppText>
+        {levels.map((level, index) => {
+          const row = (
+            <>
+              <AppText className="text-[13px] text-[#5A6772]">{level.label}</AppText>
+              <View className="flex-row items-center gap-1.5">
+                {level.verified ? <VerifiedTick size={15} width={2.6} /> : null}
+                <AppText
+                  className="text-[13.5px] font-vn-semibold"
+                  style={level.color ? { color: level.color } : undefined}
+                >
+                  {level.value}
+                  {level.note ? (
+                    <AppText className="text-[13.5px] text-[#5A6772]"> · {level.note}</AppText>
+                  ) : null}
+                </AppText>
+              </View>
+            </>
+          );
+          const style = `min-h-10 flex-row items-center justify-between gap-2.5 ${
+            index ? 'border-t border-[#EEF2F6]' : ''
+          }`;
+          const href = level.href;
+          return href ? (
+            <Pressable
+              key={level.label}
+              accessibilityRole="button"
+              onPress={() => router.push(href)}
+              className={style}
+            >
+              {row}
+            </Pressable>
+          ) : (
+            <View key={level.label} className={style}>
+              {row}
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
 
       {profile.phoneVerified ? null : (

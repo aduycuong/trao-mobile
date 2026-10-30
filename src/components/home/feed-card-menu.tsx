@@ -9,6 +9,8 @@ type FeedCardMenuProps = {
   card: FeedCard;
   onClose: () => void;
   onHide: (kind: 'listing' | 'seller') => void;
+  /** Opens the report flow for the listing. */
+  onReport: () => void;
 };
 
 const ROWS = [
@@ -28,9 +30,9 @@ const ROWS = [
 
 /**
  * Menu of a card on Home: "Không quan tâm", "Ẩn người bán", "Vì sao tôi thấy món này" and
- * "Báo cáo" (reports come in part 8, so it is drawn locked).
+ * "Báo cáo" (opens the listing report).
  */
-export function FeedCardMenu({ card, onClose, onHide }: FeedCardMenuProps) {
+export function FeedCardMenu({ card, onClose, onHide, onReport }: FeedCardMenuProps) {
   const [showReason, setShowReason] = useState(false);
 
   if (showReason) {
@@ -69,7 +71,7 @@ export function FeedCardMenu({ card, onClose, onHide }: FeedCardMenuProps) {
           d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01"
           onPress={() => setShowReason(true)}
         />
-        <MenuRow label="Báo cáo" sub="Sắp có" d="M5 21V4M5 4h11l-2 4 2 4H5" locked />
+        <MenuRow label="Báo cáo" d="M5 21V4M5 4h11l-2 4 2 4H5" onPress={onReport} />
       </View>
     </BottomSheet>
   );
@@ -80,21 +82,17 @@ function MenuRow({
   sub,
   d,
   onPress,
-  locked,
 }: {
   label: string;
   sub?: string;
   d: string;
   onPress?: () => void;
-  locked?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: locked }}
-      disabled={locked}
       onPress={onPress}
-      className={`min-h-14 flex-row items-center gap-3 ${locked ? 'opacity-50' : ''}`}
+      className="min-h-14 flex-row items-center gap-3"
     >
       <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#F1F7FE]">
         <PathIcon d={d} size={20} color="#1673D9" strokeWidth={1.9} />

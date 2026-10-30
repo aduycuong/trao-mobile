@@ -1,4 +1,11 @@
-type PushData = { type?: unknown; inboxId?: unknown; listingId?: unknown };
+type PushData = {
+  type?: unknown;
+  inboxId?: unknown;
+  listingId?: unknown;
+  reportId?: unknown;
+  caseId?: unknown;
+  penaltyId?: unknown;
+};
 
 /** Inbox a chat push belongs to, or null for other pushes. */
 export function chatInboxIdFromData(data: unknown): string | null {
@@ -13,7 +20,12 @@ export function routeForNotificationData(data: unknown): string | null {
   if (inboxId) return `/chat/${encodeURIComponent(inboxId)}`;
   // Offers, bids and auction news carry the listing they are about.
   if (data && typeof data === 'object') {
-    const { listingId } = data as PushData;
+    const { listingId, reportId, caseId, penaltyId } = data as PushData;
+    // Reports, statements and cards (the notification payload ids).
+    if (typeof reportId === 'string' && reportId) return `/reports/${encodeURIComponent(reportId)}`;
+    if (typeof caseId === 'string' && caseId) return `/cases/${encodeURIComponent(caseId)}`;
+    if (typeof penaltyId === 'string' && penaltyId)
+      return `/penalty/${encodeURIComponent(penaltyId)}`;
     if (typeof listingId === 'string' && listingId) return `/l/${encodeURIComponent(listingId)}`;
   }
   return null;

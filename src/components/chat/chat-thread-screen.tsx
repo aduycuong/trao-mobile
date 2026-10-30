@@ -1,4 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -56,6 +57,7 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
   const goBack = useGoBack('/chat');
   const { ready } = useChat();
   const thread = useChatThread(inboxId);
+  const router = useRouter();
   const { dialog, items, meUserId, firebaseUid } = thread;
   const lastSystemKey = [...items].reverse().find((item) => item.kind === 'system')?.key;
   const banner = useThreadBanner(inboxId, listingId, lastSystemKey);
@@ -172,6 +174,15 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
   );
   const onRetry = useCallback((item: ChatThreadItem) => retry(item.clientMsgId), [retry]);
   const onDiscard = useCallback((item: ChatThreadItem) => discard(item.clientMsgId), [discard]);
+  const peerUserId = peer?.userId;
+  /** Reports the other person (the scam caution, the message menu and the header options). */
+  const reportPeer = useCallback(() => {
+    if (!peerUserId) {
+      Alert.alert('Chưa mở được báo cáo', 'Thử lại sau.');
+      return;
+    }
+    router.push({ pathname: '/report', params: { type: 'user', id: peerUserId } });
+  }, [peerUserId, router]);
 
   function handleSendText(text: string) {
     send(text, reply).catch((error: unknown) => fail('Không gửi được tin nhắn', error));
@@ -225,7 +236,7 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
     } else if (action === 'hide') {
       setConfirming({ item: target, scope: 'me' });
     } else {
-      Alert.alert('Báo cáo', 'Tính năng báo cáo sẽ có ở bản cập nhật tới.');
+      reportPeer();
     }
   }
 
@@ -321,6 +332,7 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
                 onOpenImage={onOpenImage}
                 onRetry={onRetry}
                 onDiscard={onDiscard}
+                onReport={reportPeer}
               />
             </View>
           )}
@@ -483,7 +495,7 @@ export function ChatThreadScreen({ inboxId, listingId }: { inboxId: string; list
             accessibilityRole="button"
             onPress={() => {
               setOptionsOpen(false);
-              Alert.alert('Báo cáo', 'Tính năng báo cáo sẽ có ở bản cập nhật tới.');
+              reportPeer();
             }}
             className="h-12 justify-center"
           >

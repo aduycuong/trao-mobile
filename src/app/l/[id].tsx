@@ -29,6 +29,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { useOpenChat } from '@/hooks/useOpenChat';
+import { usePenaltyGuard } from '@/hooks/usePenaltyGuard';
 import { auctionIsOver, bidMinimum, canBid } from '@/services/auctions/auction-rules';
 import { fetchDeals } from '@/services/deals/deals-api';
 import {
@@ -106,8 +107,8 @@ function useNow(active: boolean): number {
 
 /**
  * The page of a listing (canvas Detail), for a viewer and for its owner. Open to guests.
- * Likes, comments and Nhắn tin work; the deal buttons and the report link are drawn but answer "sắp có"
- * until the deal and report parts are built.
+ * Likes, comments, Nhắn tin, the deal buttons and the report link work. A red card asks before an
+ * offer or a bid (the blocked sheet); the server refuses the same actions.
  */
 export default function ListingPageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -117,6 +118,7 @@ export default function ListingPageScreen() {
   const goBack = useGoBack('/');
   const { session, getIdToken } = useAuth();
   const openChat = useOpenChat();
+  const tradeGuard = usePenaltyGuard();
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoHeight, setInfoHeight] = useState(0);
   const [menu, setMenu] = useState(false);
@@ -184,13 +186,21 @@ export default function ListingPageScreen() {
     }
   }
 
-  /** The report link waits for the report part: a guest is asked to sign in, everyone else hears "sắp có". */
-  function comingSoon(what: string) {
+  /** The report link: a guest is asked to sign in, everyone else opens the report flow. */
+  function reportListing() {
     if (!session) {
       router.push('/auth-gate');
       return;
     }
-    Alert.alert(what, 'Tính năng này sắp có.');
+    router.push({ pathname: '/report', params: { type: 'listing', id } });
+  }
+
+  /** Asks before an offer or a bid; a red card opens the blocked sheet instead. */
+  function tradeAllowed(): boolean {
+    const seller = data?.available === true ? data.seller.handle : null;
+    return tradeGuard.guard('trade', {
+      onChat: seller ? () => void openChat(seller, id) : undefined,
+    });
   }
 
   function startOffer(mode: OfferMode) {
@@ -198,6 +208,7 @@ export default function ListingPageScreen() {
       router.push('/auth-gate');
       return;
     }
+    if (!tradeAllowed()) return;
     setOffering(mode);
   }
 
@@ -206,6 +217,7 @@ export default function ListingPageScreen() {
       router.push('/auth-gate');
       return;
     }
+    if (!tradeAllowed()) return;
     // Some auctions take only verified accounts; the page is readable by everyone, the button explains.
     if (
       data?.available === true &&
@@ -801,7 +813,7 @@ export default function ListingPageScreen() {
         <ListingComments listingId={id} />
         <View className="px-4">
           {!page.isOwner ? (
-            <Pressable accessibilityRole="button" onPress={() => comingSoon('Báo cáo tin này')}>
+            <Pressable accessibilityRole="button" onPress={reportListing}>
               <AppText className="py-2 text-[13px] text-[#5A6772]">Báo cáo tin này</AppText>
             </Pressable>
           ) : null}
@@ -818,6 +830,7 @@ export default function ListingPageScreen() {
         />
       ) : null}
       {policy ? <PolicySheet slug="four-forms" onClose={() => setPolicy(false)} /> : null}
+      {tradeGuard.sheet}
       {offering ? (
         <OfferSheet
           listing={{
