@@ -110,155 +110,151 @@ export default function StockTab() {
     }
   }
 
-  const header = (
-    <View>
-      {/* No logo header here (the web has none on this tab): the safe area and the web's pt-3. */}
-      <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
-        <View className="flex-row items-center pl-4 pr-2">
-          <AppText
-            accessibilityRole="header"
-            className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
+  const stickyHeader = (
+    // Stays put while the list scrolls, like the chat list.
+    <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-row items-center pl-4 pr-2">
+        <AppText
+          accessibilityRole="header"
+          className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
+        >
+          Kho đồ{' '}
+          <AppText className="text-[15px] font-vn-medium text-[#5A6772]">{allCount} món</AppText>
+        </AppText>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Tìm trong kho đồ"
+          accessibilityState={{ selected: searching }}
+          onPress={() => {
+            setSearching((on) => !on);
+            if (searching) setText('');
+          }}
+          className="h-11 w-11 items-center justify-center rounded-full"
+        >
+          <Svg
+            width={21}
+            height={21}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0F2440"
+            strokeWidth={2}
+            strokeLinecap="round"
           >
-            Kho đồ{' '}
-            <AppText className="text-[15px] font-vn-medium text-[#5A6772]">{allCount} món</AppText>
+            <Circle cx={11} cy={11} r={7} />
+            <Path d="M20 20l-4-4" />
+          </Svg>
+        </Pressable>
+      </View>
+
+      {searching ? (
+        <View className="px-4 pb-2 pt-1">
+          <TextInput
+            autoFocus
+            accessibilityLabel="Tìm trong kho đồ"
+            value={text}
+            onChangeText={setText}
+            placeholder="Tìm tên món…"
+            placeholderTextColor="#8896A3"
+            returnKeyType="search"
+            className="h-11 rounded-[14px] border-[1.5px] border-[#D5DDE5] bg-white px-3.5 font-vn text-[15px] text-[#0F2440]"
+          />
+        </View>
+      ) : null}
+
+      {first && allCount > 0 ? (
+        <ScrollView
+          horizontal
+          accessibilityRole="tablist"
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2 pb-3.5 pl-4 pr-4 pt-2"
+        >
+          <TagChip label="Tất cả" count={allCount} on={tag === null} onPress={() => setTag(null)} />
+          {first.tags.map((entry) => (
+            <TagChip
+              key={entry.tag}
+              label={entry.tag}
+              count={entry.count}
+              dot={entry.color}
+              on={tag === entry.tag}
+              onPress={() => setTag(entry.tag)}
+            />
+          ))}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setAddingTag(true)}
+            className="h-9 flex-row items-center gap-1 rounded-full border-[1.5px] border-dashed border-[#9CC3F0] px-3.5"
+          >
+            <PathIcon d={ICON_PLUS} size={14} color="#1673D9" strokeWidth={2.6} />
+            <AppText className="text-[13.5px] font-vn-semibold text-[#1673D9]">Tag</AppText>
+          </Pressable>
+        </ScrollView>
+      ) : null}
+    </View>
+  );
+
+  const listHeader = (
+    <View className="bg-white">
+      {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
+      {isPending && session ? <StockRowsSkeleton /> : null}
+
+      {first && allCount > 0 && !introHidden && !filtered ? (
+        <View className="relative mx-4 mb-1.5 mt-1 flex-row gap-3 rounded-2xl bg-[#F1F7FE] py-3 pl-3 pr-10">
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-white">
+            <CatIcon kind="stock" size={28} />
+          </View>
+          <View className="min-w-0 flex-1 gap-[3px]">
+            <AppText className="text-[14px] font-vn-bold">Kho đồ là nơi giữ đồ của bạn</AppText>
+            <AppText className="text-[13px] leading-[18.85px] text-[#33414D]">
+              Đồ bạn mua, đổi hay được tặng trên Trao tự vào đây. Món nào bạn đăng tin cũng tự có
+              trong kho. Gắn tag để dễ tìm, khi cần chỉ việc đăng lại.
+            </AppText>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ẩn giới thiệu"
+            onPress={hideIntro}
+            className="absolute right-1 top-1 h-9 w-9 items-center justify-center"
+          >
+            <PathIcon d={ICON_CLOSE} size={16} color="#5A6772" strokeWidth={2.2} />
+          </Pressable>
+        </View>
+      ) : null}
+
+      {first && allCount > 0 && rows.length === 0 ? (
+        <AppText className="px-8 py-10 text-center text-[14px] text-[#5A6772]">
+          Không có món nào khớp.
+        </AppText>
+      ) : null}
+
+      {isEmpty ? (
+        <View className="items-center gap-2.5 px-8 pt-14">
+          <CatIcon kind="stock" size={104} />
+          <AppText className="mt-2.5 text-[18px] font-vn-bold">Kho đồ còn trống</AppText>
+          <AppText className="text-center text-[14px] leading-[21.7px] text-[#5A6772]">
+            Đồ bạn mua, đổi hay được tặng trên Trao sẽ tự vào đây. Bạn cũng có thể tự thêm những món
+            đang có.
           </AppText>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Tìm trong kho đồ"
-            accessibilityState={{ selected: searching }}
-            onPress={() => {
-              setSearching((on) => !on);
-              if (searching) setText('');
-            }}
-            className="h-11 w-11 items-center justify-center rounded-full"
+            onPress={() => router.push('/stock/new')}
+            className="mt-2 h-12 flex-row items-center gap-2 rounded-[14px] bg-[#1673D9] px-5"
           >
-            <Svg
-              width={21}
-              height={21}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#0F2440"
-              strokeWidth={2}
-              strokeLinecap="round"
-            >
-              <Circle cx={11} cy={11} r={7} />
-              <Path d="M20 20l-4-4" />
-            </Svg>
+            <PathIcon d={ICON_PLUS} size={18} color="#FFFFFF" strokeWidth={2.6} />
+            <AppText className="text-[15px] font-vn-semibold text-white">Thêm món đầu tiên</AppText>
           </Pressable>
         </View>
-
-        {searching ? (
-          <View className="px-4 pb-2 pt-1">
-            <TextInput
-              autoFocus
-              accessibilityLabel="Tìm trong kho đồ"
-              value={text}
-              onChangeText={setText}
-              placeholder="Tìm tên món…"
-              placeholderTextColor="#8896A3"
-              returnKeyType="search"
-              className="h-11 rounded-[14px] border-[1.5px] border-[#D5DDE5] bg-white px-3.5 font-vn text-[15px] text-[#0F2440]"
-            />
-          </View>
-        ) : null}
-
-        {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? <StockRowsSkeleton /> : null}
-
-        {first && allCount > 0 && !introHidden && !filtered ? (
-          <View className="relative mx-4 mb-1.5 mt-1 flex-row gap-3 rounded-2xl bg-[#F1F7FE] py-3 pl-3 pr-10">
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white">
-              <CatIcon kind="stock" size={28} />
-            </View>
-            <View className="min-w-0 flex-1 gap-[3px]">
-              <AppText className="text-[14px] font-vn-bold">Kho đồ là nơi giữ đồ của bạn</AppText>
-              <AppText className="text-[13px] leading-[18.85px] text-[#33414D]">
-                Đồ bạn mua, đổi hay được tặng trên Trao tự vào đây. Món nào bạn đăng tin cũng tự có
-                trong kho. Gắn tag để dễ tìm, khi cần chỉ việc đăng lại.
-              </AppText>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ẩn giới thiệu"
-              onPress={hideIntro}
-              className="absolute right-1 top-1 h-9 w-9 items-center justify-center"
-            >
-              <PathIcon d={ICON_CLOSE} size={16} color="#5A6772" strokeWidth={2.2} />
-            </Pressable>
-          </View>
-        ) : null}
-
-        {first && allCount > 0 ? (
-          <ScrollView
-            horizontal
-            accessibilityRole="tablist"
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2 pb-3.5 pl-4 pr-4 pt-2"
-          >
-            <TagChip
-              label="Tất cả"
-              count={allCount}
-              on={tag === null}
-              onPress={() => setTag(null)}
-            />
-            {first.tags.map((entry) => (
-              <TagChip
-                key={entry.tag}
-                label={entry.tag}
-                count={entry.count}
-                dot={entry.color}
-                on={tag === entry.tag}
-                onPress={() => setTag(entry.tag)}
-              />
-            ))}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setAddingTag(true)}
-              className="h-9 flex-row items-center gap-1 rounded-full border-[1.5px] border-dashed border-[#9CC3F0] px-3.5"
-            >
-              <PathIcon d={ICON_PLUS} size={14} color="#1673D9" strokeWidth={2.6} />
-              <AppText className="text-[13.5px] font-vn-semibold text-[#1673D9]">Tag</AppText>
-            </Pressable>
-          </ScrollView>
-        ) : null}
-
-        {first && allCount > 0 && rows.length === 0 ? (
-          <AppText className="px-8 py-10 text-center text-[14px] text-[#5A6772]">
-            Không có món nào khớp.
-          </AppText>
-        ) : null}
-
-        {isEmpty ? (
-          <View className="items-center gap-2.5 px-8 pt-14">
-            <CatIcon kind="stock" size={104} />
-            <AppText className="mt-2.5 text-[18px] font-vn-bold">Kho đồ còn trống</AppText>
-            <AppText className="text-center text-[14px] leading-[21.7px] text-[#5A6772]">
-              Đồ bạn mua, đổi hay được tặng trên Trao sẽ tự vào đây. Bạn cũng có thể tự thêm những
-              món đang có.
-            </AppText>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/stock/new')}
-              className="mt-2 h-12 flex-row items-center gap-2 rounded-[14px] bg-[#1673D9] px-5"
-            >
-              <PathIcon d={ICON_PLUS} size={18} color="#FFFFFF" strokeWidth={2.6} />
-              <AppText className="text-[15px] font-vn-semibold text-white">
-                Thêm món đầu tiên
-              </AppText>
-            </Pressable>
-          </View>
-        ) : null}
-      </View>
+      ) : null}
     </View>
   );
 
   return (
     <View className="flex-1 bg-white">
+      {stickyHeader}
       <FlatList
         data={rows}
         keyExtractor={(row) => row.id}
         renderItem={({ item }) => <StockRow row={item} />}
-        ListHeaderComponent={header}
+        ListHeaderComponent={listHeader}
         ListFooterComponent={
           <View className="min-h-24 flex-1 items-center bg-white pt-4">
             {isFetchingNextPage ? (
