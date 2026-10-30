@@ -5,6 +5,11 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Share, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { AuctionBoard } from '@/components/auction/auction-board';
+import { BidSheet } from '@/components/auction/bid-sheet';
+import { DealBanner } from '@/components/deals/deal-banner';
+import { OfferSheet, type OfferMode } from '@/components/deals/offer-sheet';
+import { OwnerOffers } from '@/components/deals/owner-offers';
 import { CatIcon } from '@/components/icons/cat-icon';
 import { ListingComments } from '@/components/listing/listing-comments';
 import { OwnerMenuSheet } from '@/components/listing/owner-menu-sheet';
@@ -13,6 +18,7 @@ import { PolicySheet } from '@/components/post/policy-sheet';
 import { FollowButton } from '@/components/profile/follow-button';
 import { MediaGallery, RoundOverlayButton } from '@/components/stock/media-gallery';
 import { AppText } from '@/components/ui/app-text';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { ErrorBox } from '@/components/ui/form-controls';
 import {
   ICON_CHEVRON_LEFT,
@@ -23,12 +29,15 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { useOpenChat } from '@/hooks/useOpenChat';
+import { auctionIsOver, bidMinimum, canBid } from '@/services/auctions/auction-rules';
+import { fetchDeals } from '@/services/deals/deals-api';
 import {
   fetchListingPage,
   listingPageKey,
   recordListingView,
 } from '@/services/listings/listings-api';
 import { setListingLiked } from '@/services/profile/people-api';
+import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { ListingPageAuction, ListingPageData } from '@/types/listings';
 import type { ListingType } from '@/types/people';
 import { formatClock, formatCountdown, formatDayMonth, formatVnd } from '@/utils/format';
@@ -112,6 +121,9 @@ export default function ListingPageScreen() {
   const [infoHeight, setInfoHeight] = useState(0);
   const [menu, setMenu] = useState(false);
   const [policy, setPolicy] = useState(false);
+  const [offering, setOffering] = useState<OfferMode | null>(null);
+  const [bidding, setBidding] = useState(false);
+  const [levelNotice, setLevelNotice] = useState(false);
   const viewed = useRef(false);
 
   const queryKey = listingPageKey(id, session?.uid);
@@ -123,6 +135,30 @@ export default function ListingPageScreen() {
 
   const auction = data?.available && data.auction ? data.auction : null;
   const now = useNow(auction !== null);
+
+  // The viewer's agreements about this listing: their own (asker) or the ones on their listing (owner).
+  const dealable = data?.available === true && !data.isOwner;
+  const { data: profile } = useQuery({
+    queryKey: [...MY_PROFILE_QUERY_KEY, session?.uid],
+    queryFn: async () => fetchMyProfile(await getIdToken()),
+    enabled: dealable && data?.type === 'auction' && !!session,
+  });
+  const { data: dealList } = useQuery({
+    queryKey: ['deals', 'listing', id, session?.uid],
+    queryFn: async () => fetchDeals(await getIdToken(), { listingId: id }),
+    enabled: data?.available === true && !!session,
+  });
+  const myDeal = dealable ? (dealList?.items[0] ?? null) : null;
+  // The owner's own page: the deal in progress (done, or cancelled after the agreement) above the offers.
+  const ownerDeal =
+    data?.available === true && data.isOwner
+      ? (dealList?.items.find(
+          (deal) =>
+            deal.status === 'in_transaction' ||
+            deal.status === 'completed' ||
+            deal.transaction?.status === 'cancelled'
+        ) ?? null)
+      : null;
 
   // Others looking at a listing raise its view count (the server decides how often).
   const countable = data?.available === true && !data.isOwner;
@@ -148,13 +184,49 @@ export default function ListingPageScreen() {
     }
   }
 
-  /** Deal buttons wait for the deal part: a guest is asked to sign in, everyone else hears "sắp có". */
+  /** The report link waits for the report part: a guest is asked to sign in, everyone else hears "sắp có". */
   function comingSoon(what: string) {
     if (!session) {
       router.push('/auth-gate');
       return;
     }
     Alert.alert(what, 'Tính năng này sắp có.');
+  }
+
+  function startOffer(mode: OfferMode) {
+    if (!session) {
+      router.push('/auth-gate');
+      return;
+    }
+    setOffering(mode);
+  }
+
+  function startBid() {
+    if (!session) {
+      router.push('/auth-gate');
+      return;
+    }
+    // Some auctions take only verified accounts; the page is readable by everyone, the button explains.
+    if (
+      data?.available === true &&
+      data.auction &&
+      !canBid(data.auction.minBidderLevel, profile?.accountLevel)
+    ) {
+      setLevelNotice(true);
+      return;
+    }
+    setBidding(true);
+  }
+
+  /** Whether the agreement has something to show on the page: a deal in progress, an answer, an offer to the viewer. */
+  function showDealPanel(deal: NonNullable<typeof myDeal>) {
+    if (deal.listing.type === 'auction') {
+      return deal.status === 'in_transaction' || deal.auction?.offerForMe != null;
+    }
+    return (
+      deal.status !== 'asking' &&
+      (deal.status !== 'cancelled' || deal.transaction?.status === 'cancelled')
+    );
   }
 
   if (isPending || ownerElsewhere) {
@@ -227,23 +299,24 @@ export default function ListingPageScreen() {
     .map((entry) => entry.trim())
     .filter(Boolean);
   const tools = page.ownerTools;
-  const auctionOver = page.auction
-    ? !page.auction.running || new Date(page.auction.endsAt).getTime() <= now
-    : false;
+  const auctionOver = page.auction ? auctionIsOver(page.auction, now) : false;
   // The page stays open while the item is in a deal or the deal is done; only new offers are refused.
   const dealt = page.dealState !== 'open';
   const infoOverflows = infoHeight > INFO_COLLAPSED;
+  const inMyDeal = myDeal?.status === 'in_transaction' || myDeal?.status === 'completed';
 
-  const asks: { label: string; primary: boolean }[] =
+  const asks: { mode: OfferMode; label: string; primary: boolean }[] =
     page.type === 'sell'
       ? [
-          ...(page.allowOffers ? [{ label: 'Trả giá', primary: false }] : []),
-          { label: 'Mua ngay', primary: true },
+          ...(page.allowOffers
+            ? [{ mode: 'price' as const, label: 'Trả giá', primary: false }]
+            : []),
+          { mode: 'buy' as const, label: 'Mua ngay', primary: true },
         ]
       : page.type === 'trade'
-        ? [{ label: 'Đề nghị đổi', primary: true }]
+        ? [{ mode: 'swap' as const, label: 'Đề nghị đổi', primary: true }]
         : page.type === 'gift'
-          ? [{ label: 'Đăng ký nhận', primary: true }]
+          ? [{ mode: 'gift' as const, label: 'Đăng ký nhận', primary: true }]
           : [];
 
   const policyDot = (
@@ -351,7 +424,7 @@ export default function ListingPageScreen() {
               {formatDayMonth(new Date(page.auction.startsAt))}. Đến giờ tin tự lên chợ.
             </Note>
           ) : null}
-          {dealt ? (
+          {dealt && (page.isOwner ? dealList !== undefined && !ownerDeal : !inMyDeal) ? (
             // Not on the canvas: the same note as "Tin đang được cập nhật" below.
             <Note>
               {page.dealState === 'completed'
@@ -429,21 +502,30 @@ export default function ListingPageScreen() {
           </Pressable>
         </View>
 
-        {page.type === 'auction' ? (
-          <View className="mx-4 mt-[18px] overflow-hidden rounded-[20px] border border-[#E1E7EE]">
-            <View className="flex-row items-center gap-2.5 bg-[#FFF7E0] px-3.5 pb-2.5 pt-3.5">
-              <AppText className="flex-1 text-[16px] font-vn-bold">Bảng đặt giá</AppText>
-            </View>
-            <AppText className="px-3.5 pb-4 pt-1 text-[13.5px] text-[#5A6772]">
-              {page.auction && page.auction.bidCount > 0
-                ? `${page.auction.bidCount} lượt đặt. Bảng đặt giá sắp có.`
-                : 'Chưa có lượt đặt giá nào.'}
-            </AppText>
+        {ownerDeal ? (
+          <View className="px-4 pt-[18px]">
+            <DealBanner deal={ownerDeal} screen="item" onBid={startBid} />
           </View>
+        ) : null}
+
+        {page.type === 'auction' ? (
+          page.auction ? (
+            <AuctionBoard listingId={page.id} endsAt={page.auction.endsAt} />
+          ) : null
+        ) : page.isOwner ? (
+          <OwnerOffers
+            listingId={page.id}
+            type={page.type}
+            allowOffers={page.allowOffers}
+            locked={dealt}
+          />
         ) : null}
 
         {!page.isOwner ? (
           <View className="gap-2 px-4 pt-4">
+            {myDeal && showDealPanel(myDeal) ? (
+              <DealBanner deal={myDeal} screen="item" onBid={startBid} />
+            ) : null}
             <View className="flex-row gap-2">
               <ActionButton
                 outline
@@ -464,12 +546,12 @@ export default function ListingPageScreen() {
                 </Svg>
                 <AppText className="text-[15px] font-vn-bold">Nhắn tin</AppText>
               </ActionButton>
-              {!dealt
+              {!dealt && (!myDeal || myDeal.status === 'asking' || myDeal.status === 'cancelled')
                 ? asks.map((ask) => (
                     <ActionButton
-                      key={ask.label}
+                      key={ask.mode}
                       outline={!ask.primary}
-                      onPress={() => comingSoon(ask.label)}
+                      onPress={() => startOffer(ask.mode)}
                     >
                       <AppText
                         className={`text-[15px] font-vn-bold ${ask.primary ? 'text-white' : ''}`}
@@ -487,7 +569,7 @@ export default function ListingPageScreen() {
                     </AppText>
                   </View>
                 ) : (
-                  <ActionButton onPress={() => comingSoon('Đặt giá')}>
+                  <ActionButton onPress={startBid}>
                     <AppText className="text-[15px] font-vn-bold text-white">Đặt giá</AppText>
                   </ActionButton>
                 )
@@ -519,15 +601,6 @@ export default function ListingPageScreen() {
                 {tools.editBlockedReason}
               </AppText>
             ) : null}
-            <View className="mt-3 gap-1 rounded-2xl bg-[#F1F7FE] p-3.5">
-              <AppText className="text-[14px] font-vn-bold">
-                {page.type === 'auction' ? 'Bảng đặt giá' : 'Lời đề nghị'}
-              </AppText>
-              <AppText className="text-[13px] leading-[19px] text-[#5A6772]">
-                Chưa có {page.type === 'gift' ? 'ai đăng ký' : 'đề nghị nào'}. Khi có người gửi, bạn
-                sẽ thấy ở đây.
-              </AppText>
-            </View>
           </View>
         ) : null}
 
@@ -745,6 +818,57 @@ export default function ListingPageScreen() {
         />
       ) : null}
       {policy ? <PolicySheet slug="four-forms" onClose={() => setPolicy(false)} /> : null}
+      {offering ? (
+        <OfferSheet
+          listing={{
+            id: page.id,
+            title: page.title,
+            price: page.type === 'sell' ? page.price : null,
+          }}
+          mode={offering}
+          onClose={() => setOffering(null)}
+        />
+      ) : null}
+      {bidding && page.auction ? (
+        <BidSheet
+          listing={{ id: page.id, title: page.title }}
+          minimum={bidMinimum(page.auction)}
+          step={page.auction.minIncrement}
+          currentPrice={page.auction.currentPrice}
+          bidCount={page.auction.bidCount}
+          onClose={() => setBidding(false)}
+        />
+      ) : null}
+      {levelNotice ? (
+        <BottomSheet
+          title="Phiên này cần tài khoản Đã xác thực"
+          onClose={() => setLevelNotice(false)}
+        >
+          <AppText className="text-[14px] leading-[21.7px] text-[#33414D]">
+            Người đăng chỉ nhận lượt đặt giá từ tài khoản đã xác minh số điện thoại. Bạn vẫn xem
+            được phiên và bảng đặt giá.
+          </AppText>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setLevelNotice(false);
+              router.push('/verify-phone');
+            }}
+            className="h-[50px] items-center justify-center rounded-[14px] bg-[#1673D9]"
+          >
+            <AppText className="text-[15px] font-vn-bold text-white">
+              Xác minh số điện thoại
+            </AppText>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setLevelNotice(false)}
+            className="h-[50px] items-center justify-center rounded-[14px] bg-[#F1F7FE]"
+          >
+            <AppText className="text-[15px] font-vn-semibold">Để sau</AppText>
+          </Pressable>
+        </BottomSheet>
+      ) : null}
     </View>
   );
 }

@@ -21,6 +21,7 @@ import {
   PathIcon,
 } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchDeals } from '@/services/deals/deals-api';
 import { useGoBack } from '@/hooks/useGoBack';
 import { usePostGuard } from '@/hooks/usePostGuard';
 import {
@@ -98,6 +99,19 @@ function StockItemContent() {
     // Photos and videos are checked after the item is saved: look again until that is done.
     refetchInterval: (query) => (query.state.data?.mediaStatus === 'checking' ? 5000 : false),
   });
+
+  // Who the item is in a deal with ("Đang giao dịch · với …"): the deal in progress on one of its listings.
+  const { data: activeDeals } = useQuery({
+    queryKey: ['deals', 'item-partner', id, session?.uid],
+    queryFn: async () => fetchDeals(await getIdToken(), { scope: 'active', limit: 100 }),
+    enabled: !!session && item?.locked === true,
+    retry: false,
+  });
+  const partnerName =
+    activeDeals?.items.find(
+      (deal) =>
+        deal.status === 'in_transaction' && item?.listings.some((l) => l.id === deal.listing.id)
+    )?.counterpart.name ?? null;
 
   async function refresh() {
     await Promise.all([
@@ -475,7 +489,8 @@ function StockItemContent() {
       >
         {item.locked ? (
           <AppText className="text-center text-[12.5px] text-[#5A6772]">
-            Đang giao dịch · mở khoá khi giao dịch xong hoặc bị huỷ
+            Đang giao dịch{partnerName ? ` · với ${partnerName}` : ''} · mở khoá khi giao dịch xong
+            hoặc bị huỷ
           </AppText>
         ) : null}
         <View className="flex-row gap-2.5">

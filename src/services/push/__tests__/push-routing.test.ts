@@ -7,6 +7,10 @@ describe('routeForNotificationData', () => {
     );
   });
 
+  it('opens the listing of an offer or bid push', () => {
+    expect(routeForNotificationData({ listingId: 'l1', dealId: 'd1' })).toBe('/l/l1');
+  });
+
   it('ignores unknown or malformed data', () => {
     expect(routeForNotificationData(undefined)).toBeNull();
     expect(routeForNotificationData({ type: 'other' })).toBeNull();

@@ -11,6 +11,7 @@ import {
   type ChatDealSummary,
   type ChatListRowData,
 } from '@/services/chat/chat-list';
+import { DEAL_TONE_COLORS, type DealTone } from '@/services/deals/deal-banner';
 import { formatChatListTime, getDialogPreview } from '@/services/chat/chat-view';
 import type { ListingType } from '@/types/people';
 
@@ -21,17 +22,9 @@ const DEAL_ICON: Record<ListingType, CatIconKind> = {
   gift: 'gift',
 };
 
-/** Chip colors of the canvas Chat list (`DT`): [background, text]. */
-const CHIP_TONES = {
-  going: ['#E6F1FF', '#0B4A99'],
-  idle: ['#F2F5F8', '#33414D'],
-} as const;
-
-/**
- * Where part 7B puts the short deal status on the chip ("Chờ bạn trả lời"). Returning null shows
- * the form and the item only, which is all the deal index says without the deal rules.
- */
+/** The short deal status on the chip ("Chờ bạn trả lời"), and its tone (canvas Chat list). */
 export type DealStatusOf = (deal: ChatDealSummary) => string | null;
+export type DealToneOf = (deal: ChatDealSummary) => DealTone;
 
 function DealThumb({ deal, size }: { deal: ChatDealSummary; size: number }) {
   return (
@@ -53,10 +46,19 @@ function DealThumb({ deal, size }: { deal: ChatDealSummary; size: number }) {
 }
 
 /** The deals of the chat under the last message (canvas Chat list). */
-function DealChip({ deals, statusOf }: { deals: ChatDealSummary[]; statusOf?: DealStatusOf }) {
+function DealChip({
+  deals,
+  statusOf,
+  toneOf,
+}: {
+  deals: ChatDealSummary[];
+  statusOf?: DealStatusOf;
+  toneOf?: DealToneOf;
+}) {
   const chip = describeDealChip(deals, statusOf);
   if (!chip) return null;
-  const [bg, fg] = chip.first.active ? CHIP_TONES.going : CHIP_TONES.idle;
+  const { bg, fg } =
+    DEAL_TONE_COLORS[toneOf ? toneOf(chip.first) : chip.first.active ? 'offer' : 'ref'];
 
   return (
     <View
@@ -84,10 +86,11 @@ type ChatListRowProps = {
   row: ChatListRowData;
   meUserId: string | null;
   statusOf?: DealStatusOf;
+  toneOf?: DealToneOf;
 };
 
 /** One chat of the list: the person (dot when online), the last message, the time, the unread count. */
-function ChatListRowView({ row, meUserId, statusOf }: ChatListRowProps) {
+function ChatListRowView({ row, meUserId, statusOf, toneOf }: ChatListRowProps) {
   const router = useRouter();
   const { dialog, peer, deals, lastActivityAt } = row;
   const online = usePeerPresence(peer?.firebaseUid);
@@ -139,7 +142,7 @@ function ChatListRowView({ row, meUserId, statusOf }: ChatListRowProps) {
             </View>
           ) : null}
         </View>
-        <DealChip deals={deals} statusOf={statusOf} />
+        <DealChip deals={deals} statusOf={statusOf} toneOf={toneOf} />
       </View>
     </Pressable>
   );

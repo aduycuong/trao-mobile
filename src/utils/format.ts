@@ -129,3 +129,13 @@ export function formatRelativeTime(value: string | Date, now = Date.now()): stri
   const sameYear = Number(parts.year) === new Date(now).getFullYear();
   return sameYear ? `${parts.day}/${parts.month}` : `${parts.day}/${parts.month}/${parts.year}`;
 }
+
+/** "3g 20p" until `end`, or null once it has passed (banner and chat-list copy). */
+export function describeTimeLeft(end: Date, now = new Date()): string | null {
+  const minutes = Math.floor((end.getTime() - now.getTime()) / 60_000);
+  if (minutes <= 0) return null;
+  if (minutes < 60) return `${minutes}p`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}g ${String(minutes % 60).padStart(2, '0')}p`;
+  return `${Math.floor(hours / 24)} ngày ${hours % 24}g`;
+}

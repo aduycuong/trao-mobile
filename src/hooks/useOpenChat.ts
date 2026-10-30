@@ -3,15 +3,16 @@ import { useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useChat } from '@/hooks/useChat';
+import { openListingDeal } from '@/services/deals/deals-api';
 
 /**
  * Opens the chat with another user, given by the handle of their profile link (from a profile or
- * a listing page). With `listingId` the thread shows that listing on top, so the chat shows what
- * the talk is about. A guest is sent to sign in; a blocked user shows the server's answer.
+ * a listing page). With `listingId` it is `POST /api/listings/:id/deal`: the chat opens with the
+ * agreement about that listing, and the thread shows it on top. A guest is sent to sign in; a blocked user shows the server's answer.
  */
 export function useOpenChat() {
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, getIdToken } = useAuth();
   const { api } = useChat();
   const busy = useRef(false);
 
@@ -28,7 +29,10 @@ export function useOpenChat() {
       }
       busy.current = true;
       try {
-        const { inboxId } = await api.getOrCreateDirectInbox({ handle });
+        // From a listing the chat and the agreement about it are opened together.
+        const { inboxId } = listingId
+          ? await openListingDeal(await getIdToken(), listingId)
+          : await api.getOrCreateDirectInbox({ handle });
         router.push({
           pathname: '/chat/[inboxId]',
           params: listingId ? { inboxId, listing: listingId } : { inboxId },
@@ -42,6 +46,6 @@ export function useOpenChat() {
         busy.current = false;
       }
     },
-    [session, api, router]
+    [session, api, router, getIdToken]
   );
 }
