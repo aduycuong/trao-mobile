@@ -1,14 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, type Href } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  SectionList,
-  View,
-} from 'react-native';
+import { Pressable, RefreshControl, ScrollView, SectionList, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { NotificationRow } from '@/components/notifications/notification-row';
 import { ScreenBar } from '@/components/navigation/screen-bar';
@@ -263,11 +256,7 @@ export function NotificationsScreen() {
           ListEmptyComponent={list.data ? <EmptyState /> : null}
           ListFooterComponent={
             <View>
-              {list.isFetchingNextPage ? (
-                <View className="items-center py-4">
-                  <ActivityIndicator color="#1673D9" />
-                </View>
-              ) : null}
+              {list.isFetchingNextPage ? <RowSkeleton /> : null}
               <AppText className="px-4 pb-6 pt-[18px] text-center text-[12.5px] leading-[18.75px] text-[#A3AEB9]">
                 Tin nhắn và đề nghị nằm ở tab Tin nhắn. Thông báo giữ trong 30 ngày.
               </AppText>
