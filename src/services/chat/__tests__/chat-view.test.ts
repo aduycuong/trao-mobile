@@ -6,6 +6,7 @@ import {
   getDialogDisplay,
   getDialogPreview,
   getReplyPreviewText,
+  getSystemTone,
   resolveChatAvatar,
   withMyReaction,
 } from '../chat-view';
@@ -409,5 +410,46 @@ describe('chat-view', () => {
       reactions: { '😂': 1 },
       myReaction: '😂',
     });
+  });
+
+  it('turns system messages into centered lines with a tone from the event', () => {
+    const line = (event: string): ChatMessage => ({
+      ...message(4, 'system', 'c4'),
+      type: 'system',
+      content: { text: 'Minh Anh trả giá', event, dealId: 'd1', listingId: 'l1' },
+    });
+    const [info, deal, done] = buildThreadItems(
+      dialog,
+      [line('offer_sent'), line('deal_accepted'), line('transaction_completed')],
+      [],
+      [],
+      'me'
+    );
+    expect([info?.kind, info?.text, info?.systemTone, info?.isMine, info?.status]).toEqual([
+      'system',
+      'Minh Anh trả giá',
+      'info',
+      false,
+      null,
+    ]);
+    expect(deal?.systemTone).toBe('deal');
+    expect(done?.systemTone).toBe('done');
+    expect(getSystemTone(null)).toBe('info');
+  });
+
+  it('previews a system line as its text', () => {
+    const last = {
+      ...dialog,
+      lastMessage: {
+        id: 'm9',
+        seq: 9,
+        senderId: 'system',
+        type: 'system',
+        content: { text: 'Hoàng Nam đồng ý bán iPhone' },
+        deletedAt: null,
+        createdAt: '2026-10-03T08:00:00.000Z',
+      },
+    };
+    expect(getDialogPreview(last, 'me')).toBe('Hoàng Nam đồng ý bán iPhone');
   });
 });

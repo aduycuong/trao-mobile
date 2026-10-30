@@ -34,12 +34,31 @@ export type ChatThreadMedia = {
   blurhash: string | null;
 };
 
+export type ChatSystemTone = 'info' | 'deal' | 'done';
+
+/** The deal events (`postSystemMessage`) whose line is not grey. */
+const SYSTEM_EVENT_TONES: Partial<Record<string, ChatSystemTone>> = {
+  deal_accepted: 'deal',
+  auction_won: 'deal',
+  auction_next_bidder: 'deal',
+  transaction_completed: 'done',
+};
+
+/** Colors of a system line (canvas Chat): grey for news, yellow for an agreement, green for a finished trade. */
+export function getSystemTone(content: ChatMessage['content']): ChatSystemTone {
+  const event = content?.event;
+  return (typeof event === 'string' ? SYSTEM_EVENT_TONES[event] : undefined) ?? 'info';
+}
+
 export type ChatThreadReaction = { emoji: string; count: number };
 
 /** A message ready to render, whether confirmed or still queued. */
 export type ChatThreadItem = {
   key: string;
-  kind: 'text' | 'media' | 'sticker';
+  /** `system`: a line the app writes about a deal, shown centered (part 7B fills the events). */
+  kind: 'text' | 'media' | 'sticker' | 'system';
+  /** Tone of a `system` line. */
+  systemTone: ChatSystemTone | null;
   /** Images of a media message, in the order they were picked. */
   media: ChatThreadMedia[];
   /** Media blocked as unsuitable: show a placeholder, never the content. */
@@ -261,9 +280,19 @@ export function buildThreadItems(
     const isMine = message.senderId === meUserId;
     const deleted = message.deletedAt !== null;
     const isSticker = !deleted && message.type === 'sticker';
+    const isSystem = message.type === 'system';
     return {
       key: message.id,
-      kind: deleted ? 'text' : message.type === 'media' ? 'media' : isSticker ? 'sticker' : 'text',
+      kind: isSystem
+        ? 'system'
+        : deleted
+          ? 'text'
+          : message.type === 'media'
+            ? 'media'
+            : isSticker
+              ? 'sticker'
+              : 'text',
+      systemTone: isSystem ? getSystemTone(message.content) : null,
       media: deleted
         ? []
         : readAttachments(message.content).map((attachment) => ({
@@ -280,14 +309,14 @@ export function buildThreadItems(
       id: message.id,
       clientMsgId: message.clientMsgId,
       senderId: message.senderId,
-      isMine,
+      isMine: isMine && !isSystem,
       text: isSticker ? null : textOf(message.content),
       sticker: isSticker ? (message.sticker ?? null) : null,
       deleted,
       reactions: deleted ? [] : listReactions(message.reactions),
       myReaction: deleted ? null : (message.myReaction ?? null),
       replyTo: deleted ? null : resolveReplyTo(message.replyTo),
-      status: isMine ? getMessageStatus(dialog, message, meUserId) : null,
+      status: isMine && !isSystem ? getMessageStatus(dialog, message, meUserId) : null,
       readCount:
         isMine && dialog.type === 'group'
           ? dialog.members.filter(
@@ -307,6 +336,7 @@ export function buildThreadItems(
       item: {
         key: `local-${message.clientMsgId}`,
         kind: message.type,
+        systemTone: null,
         media: [],
         blocked: false,
         seq: null,
@@ -334,6 +364,7 @@ export function buildThreadItems(
       item: {
         key: `local-${message.clientMsgId}`,
         kind: 'media',
+        systemTone: null,
         media: message.media.map((file) => ({
           key: file.localId,
           attachmentId: null,
