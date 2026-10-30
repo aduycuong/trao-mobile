@@ -187,3 +187,28 @@ export function subscribePhoneVerifiedSignal(
     (error) => console.warn('[phone-verification] signal error', error)
   );
 }
+
+/** Doorbell of a live auction: the server writes here at every bid and when the round ends. */
+export const AUCTION_SIGNAL_PATH = 'auction-signal';
+
+/**
+ * Calls `onRing` at every change the server writes to `auction-signal/{listingId}` (not for the
+ * value already there when subscribing, which the page has just read). Returns the unsubscribe
+ * function, or null when RTDB is not available.
+ */
+export function subscribeAuctionSignal(listingId: string, onRing: () => void) {
+  const db = getDb();
+  if (!db) return null;
+  let first = true;
+  return onValue(
+    ref(db, `${AUCTION_SIGNAL_PATH}/${listingId}`),
+    () => {
+      if (first) {
+        first = false;
+        return;
+      }
+      onRing();
+    },
+    (error) => console.warn('[auctions] signal error', error)
+  );
+}
