@@ -1,24 +1,49 @@
 import React from 'react';
-import Svg, {
-  Circle,
-  Defs,
-  Ellipse,
-  FeComposite,
-  FeDropShadow,
-  FeFlood,
-  FeMerge,
-  FeMergeNode,
-  FeMorphology,
-  Filter,
-  G,
-  Path,
-  Rect,
-  Text,
-} from 'react-native-svg';
+import Svg, { Circle, Ellipse, G, Path, Rect, Text } from 'react-native-svg';
 import { CHAT_STICKERS, type ChatStickerId } from '@/services/chat/stickers';
 
 // Ported from the canvas Stickers artboard ("Bé Thùng"); the SVGs are the canvas ones.
 const FONT = 'BeVietnamPro_700Bold';
+
+const OUTLINE_RADIUS = 3.2;
+// The canvas shadow (0 1.5 offset, 18% navy) already blended onto a white page.
+const SHADOW_COLOR = '#D5D9DE';
+
+type ShapeProps = { fill?: string; strokeWidth?: number | string; children?: React.ReactNode };
+
+/** Paints every shape of a sticker in one colour, thickened by the outline radius. */
+function silhouette(node: React.ReactNode, color: string): React.ReactNode {
+  return React.Children.map(node, (child) => {
+    if (!React.isValidElement<ShapeProps>(child)) return child;
+    if (child.type === G) {
+      return React.cloneElement(child, undefined, silhouette(child.props.children, color));
+    }
+    const lineOnly = child.props.fill === 'none';
+    return React.cloneElement(child as React.ReactElement<Record<string, unknown>>, {
+      fill: lineOnly ? 'none' : color,
+      stroke: color,
+      strokeWidth: (lineOnly ? Number(child.props.strokeWidth) || 0 : 0) + OUTLINE_RADIUS * 2,
+      strokeLinejoin: 'round',
+      strokeLinecap: 'round',
+      opacity: undefined,
+    });
+  });
+}
+
+/**
+ * The canvas gives stickers a white sticker-style outline and a soft shadow with an SVG
+ * filter. react-native-svg fills the whole filter region with white instead (a white box
+ * behind the sticker), so the outline is drawn as thickened white copies of the shapes.
+ */
+function Outlined({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <G translateY={1.5}>{silhouette(children, SHADOW_COLOR)}</G>
+      <G>{silhouette(children, '#FFFFFF')}</G>
+      {children}
+    </>
+  );
+}
 
 /** One of the chat stickers, drawn in the app. `id` is `content.stickerId` of the message. */
 export function ChatSticker({ id, size }: { id: string; size: number }) {
@@ -29,28 +54,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'chot':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(-4) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -92,7 +96,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               d="M0-7C1-1.5 1.5-1 7 0C1.5 1 1 1.5 0 7C-1 1.5-1.5 1-7 0C-1.5-1-1-1.5 0-7Z"
               fill="#64AEF7"
             />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -111,28 +115,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'con':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(6) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -155,7 +138,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
             <Text x="18" y="34" fontFamily={FONT} fontSize="18" fill="#64AEF7">
               ?
             </Text>
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -174,28 +157,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'bot':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(0) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -233,7 +195,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
             <Circle cx="24" cy="62" r="6" fill="#1673D9" />
             <Circle cx="104" cy="62" r="6" fill="#1673D9" />
             <Path d="M96 38c0 4-3 6-5 6s-5-2-5-6 5-10 5-10 5 6 5 10z" fill="#64AEF7" />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -252,28 +214,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'toi':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <Path
               d="M8 52h18M4 64h20M10 76h14"
               stroke="#64AEF7"
@@ -309,7 +250,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               strokeLinecap="round"
             />
             <Path d="M96 66l10-6" stroke="#1673D9" strokeWidth="6" strokeLinecap="round" />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -328,28 +269,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'doi':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(0) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -386,7 +306,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               strokeWidth="6"
               strokeLinecap="round"
             />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -405,28 +325,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'camon':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(-3) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -476,7 +375,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               d="M0-7C1-1.5 1.5-1 7 0C1.5 1 1 1.5 0 7C-1 1.5-1.5 1-7 0C-1.5-1-1-1.5 0-7Z"
               fill="#FFC22E"
             />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -495,28 +394,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'nhan':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <Path
               d="M14 40l6 4M110 52l6-3M20 88l5-3"
               stroke="#FFC22E"
@@ -564,7 +442,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               strokeWidth="6"
               strokeLinecap="round"
             />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
@@ -583,28 +461,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
     case 'ok':
       return (
         <Svg width={size} height={size} accessibilityLabel={name} viewBox="0 0 128 128">
-          <Defs>
-            <Filter id="stkO" x="-20%" y="-20%" width="140%" height="140%">
-              <FeMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d" />
-              <FeFlood floodColor="#FFFFFF" />
-              <FeComposite in2="d" operator="in" result="o" />
-              <FeDropShadow
-                dx="0"
-                dy="1.5"
-                stdDeviation="1.2"
-                floodColor="#0F2440"
-                floodOpacity="0.18"
-                in="o"
-                result="s"
-              />
-              <FeMerge>
-                <FeMergeNode in="s" />
-                <FeMergeNode in="o" />
-                <FeMergeNode in="SourceGraphic" />
-              </FeMerge>
-            </Filter>
-          </Defs>
-          <G filter="url(#stkO)">
+          <Outlined>
             <G transform="translate(64 70) rotate(4) translate(-64 -70)">
               <Path d="M32 40h64v46a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z" fill="#FFC22E" />
               <Path
@@ -651,7 +508,7 @@ export function ChatSticker({ id, size }: { id: string; size: number }) {
               d="M0-7C1-1.5 1.5-1 7 0C1.5 1 1 1.5 0 7C-1 1.5-1.5 1-7 0C-1.5-1-1-1.5 0-7Z"
               fill="#64AEF7"
             />
-          </G>
+          </Outlined>
           <Rect
             x="16"
             y="101"
