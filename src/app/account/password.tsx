@@ -9,16 +9,20 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   getPasswordStrength,
   validateChangePassword,
+  validateSetPassword,
   type AuthFieldErrors,
 } from '@/utils/auth-validation';
 
 type Errors = AuthFieldErrors & { currentPassword?: string };
 
-/** Change the password; the current password is asked first (Firebase re-authentication). */
+/**
+ * Change the password (the current one is asked first), or set one for an account that only
+ * signs in with Google or Facebook.
+ */
 export default function AccountPasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { changePassword } = useAuth();
+  const { changePassword, setPassword: setNewPassword, canChangePassword } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,18 +37,27 @@ export default function AccountPasswordScreen() {
   };
 
   async function submit() {
-    const errors = validateChangePassword(currentPassword, password, confirmPassword);
+    const errors = canChangePassword
+      ? validateChangePassword(currentPassword, password, confirmPassword)
+      : validateSetPassword(password, confirmPassword);
     setFieldErrors(errors);
     setError(null);
     if (Object.keys(errors).length > 0) return;
 
     setSaving(true);
     try {
-      await changePassword(currentPassword, password);
-      Alert.alert('Đã đổi mật khẩu');
+      if (canChangePassword) await changePassword(currentPassword, password);
+      else await setNewPassword(password);
+      Alert.alert(canChangePassword ? 'Đã đổi mật khẩu' : 'Đã đặt mật khẩu');
       back();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Không đổi được mật khẩu. Thử lại sau.');
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : canChangePassword
+            ? 'Không đổi được mật khẩu. Thử lại sau.'
+            : 'Không đặt được mật khẩu. Thử lại sau.'
+      );
       setSaving(false);
     }
   }
@@ -54,28 +67,36 @@ export default function AccountPasswordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       className="flex-1 bg-white"
     >
-      <ScreenBar title="Đổi mật khẩu" onBack={back} />
+      <ScreenBar title={canChangePassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'} onBack={back} />
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-[18px] px-5 pt-5"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="gap-2">
-          <AuthField
-            label="Mật khẩu hiện tại"
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-            placeholder="Mật khẩu hiện tại"
-            password
-            autoComplete="current-password"
-            textContentType="password"
-            invalid={!!fieldErrors.currentPassword}
-          />
-          {fieldErrors.currentPassword ? (
-            <AuthError>{fieldErrors.currentPassword}</AuthError>
-          ) : null}
-        </View>
+        {canChangePassword ? null : (
+          <AppText className="text-[14px] leading-normal text-[#33414D]">
+            Tài khoản này đăng nhập bằng Google hoặc Facebook. Đặt mật khẩu để có thể đăng nhập bằng
+            email nữa.
+          </AppText>
+        )}
+        {canChangePassword ? (
+          <View className="gap-2">
+            <AuthField
+              label="Mật khẩu hiện tại"
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              placeholder="Mật khẩu hiện tại"
+              password
+              autoComplete="current-password"
+              textContentType="password"
+              invalid={!!fieldErrors.currentPassword}
+            />
+            {fieldErrors.currentPassword ? (
+              <AuthError>{fieldErrors.currentPassword}</AuthError>
+            ) : null}
+          </View>
+        ) : null}
         <View className="gap-2">
           <AuthField
             label="Mật khẩu mới"
@@ -137,7 +158,11 @@ export default function AccountPasswordScreen() {
         className="border-t border-[#EEF2F6] px-5 pt-3"
         style={{ paddingBottom: 20 + insets.bottom }}
       >
-        <AuthButton label="Đổi mật khẩu" onPress={submit} loading={saving} />
+        <AuthButton
+          label={canChangePassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
+          onPress={submit}
+          loading={saving}
+        />
       </View>
     </KeyboardAvoidingView>
   );

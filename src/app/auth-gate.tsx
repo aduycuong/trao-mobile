@@ -82,7 +82,7 @@ export default function AuthGateScreen() {
         </View>
       </ScrollView>
       <View className="gap-2.5 px-6 pt-4" style={{ paddingBottom: 24 + insets.bottom }}>
-        <SocialButtons />
+        <SocialButtons onSignedIn={close} />
         <AuthButton label="Dùng email" onPress={() => router.replace('/login')} />
         <View className="mt-1 flex-row items-center justify-center gap-1">
           <AppText className="text-[14px] text-[#33414D]">Chưa có tài khoản?</AppText>

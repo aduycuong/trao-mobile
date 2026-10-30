@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, signInWithCredential, type User } from 'firebase/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   cacheProfile,
@@ -15,11 +15,17 @@ import {
   changeAccountPassword,
   isNetworkAuthError,
   registerWithEmail,
+  setAccountPassword,
   signInWithEmail,
   signOutFirebase,
   updateAccountProfile,
 } from '@/services/firebase-auth';
 import { markPresenceOffline } from '@/services/chat/rtdb';
+import {
+  getSocialCredential,
+  socialErrorMessage,
+  type SocialProvider,
+} from '@/services/social-auth';
 import { unregisterDeviceForPush } from '@/services/push/push-device';
 
 export type AppSession = {
@@ -48,6 +54,11 @@ type AuthContextValue = {
   getIdToken: () => Promise<string>;
   signIn: (email: string, password: string) => Promise<void>;
   register: (displayName: string, email: string, password: string) => Promise<void>;
+  /**
+   * Continues with Google or Facebook; a new user is created on first use. Resolves false when
+   * the user closes the provider's sheet.
+   */
+  signInWithSocial: (provider: SocialProvider) => Promise<boolean>;
   signOut: () => Promise<void>;
   /** Changes the signed-in user's name and/or photo; omitted fields stay as they are. */
   updateProfile: (changes: { displayName?: string; avatarUrl?: string | null }) => Promise<void>;
@@ -59,6 +70,8 @@ type AuthContextValue = {
   /** False for accounts without an email + password login. */
   canChangePassword: boolean;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  /** Adds a password login to a Google/Facebook-only account. */
+  setPassword: (newPassword: string) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -219,6 +232,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [runSignIn]
   );
 
+  const signInWithSocial = useCallback(
+    async (provider: SocialProvider) => {
+      const credential = await getSocialCredential(provider);
+      if (!credential) return false;
+      const auth = getFirebaseAuth();
+      if (!auth)
+        throw new Error('Firebase chưa được cấu hình. Hãy thêm EXPO_PUBLIC_FIREBASE_API_KEY.');
+      try {
+        await runSignIn(async () => (await signInWithCredential(auth, credential)).user);
+      } catch (error) {
+        throw new Error(socialErrorMessage(error, provider, 'Không đăng nhập được. Thử lại sau.'));
+      }
+      return true;
+    },
+    [runSignIn]
+  );
+
   const signOut = useCallback(async () => {
     const current = sessionRef.current;
     // Presence rules need the user's auth, so write "offline" before the SDK signs out.
@@ -270,6 +300,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setPassword = useCallback(
+    async (newPassword: string) => {
+      await setAccountPassword(newPassword);
+      await refreshProfile();
+    },
+    [refreshProfile]
+  );
+
   const passwordLogin = session ? hasPasswordLogin() : false;
 
   const value = useMemo(
@@ -282,7 +320,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       retryProfile,
       session,
+      setPassword,
       signIn,
+      signInWithSocial,
       signOut,
       status,
       updateProfile,
@@ -296,7 +336,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       retryProfile,
       session,
+      setPassword,
       signIn,
+      signInWithSocial,
       signOut,
       status,
       updateProfile,

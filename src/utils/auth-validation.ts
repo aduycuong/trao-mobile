@@ -62,6 +62,16 @@ export function validateResetPassword(password: string, confirmPassword: string)
 }
 
 /** Same rules as the web `changePasswordFormSchema`. */
+/** Setting a first password: same rules as the web `setPasswordFormSchema`. */
+export function validateSetPassword(password: string, confirmPassword: string): AuthFieldErrors {
+  const errors: AuthFieldErrors = {};
+  const passwordError = validateNewPassword(password);
+  if (passwordError) errors.password = passwordError;
+  if (!confirmPassword) errors.confirmPassword = 'Nhập lại mật khẩu mới.';
+  else if (confirmPassword !== password) errors.confirmPassword = 'Hai mật khẩu chưa giống nhau.';
+  return errors;
+}
+
 export function validateChangePassword(
   currentPassword: string,
   password: string,
