@@ -310,7 +310,7 @@ export default function FeedbackScreen() {
             accessibilityLabel="Cho phép Trao liên hệ lại"
             accessibilityState={{ checked: allowContact }}
             onPress={() => setAllowContact((current) => !current)}
-            className={`h-7 w-[46px] rounded-full p-[3px] ${
+            className={`h-7 w-[46px] shrink-0 rounded-full p-[3px] ${
               allowContact ? 'items-end bg-[#1673D9]' : 'items-start bg-[#C3CCD6]'
             }`}
           >
