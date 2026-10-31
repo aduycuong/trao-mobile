@@ -54,7 +54,7 @@ import {
   buildListingBody,
   canPostAlongside,
   describeMain,
-  digitsOnly,
+  editMoney,
   groupedDigits,
   isStartValid,
   type ListingDraft,
@@ -172,6 +172,8 @@ type PostListingFlowProps = {
   prefill?: ListingFormFields;
   /** Screen title: "Đăng tin" (default), "Sửa tin", "Đăng lại". */
   title?: string;
+  /** Open on the "sent" screen with this outcome (the item of the listing was edited and saved). */
+  sent?: 'pending_review' | 'published' | 'scheduled';
 };
 
 /** Đăng tin steps 2 and 3 plus the "sent" screen (canvas Post: listing, check, done). */
@@ -182,6 +184,7 @@ export function PostListingFlow({
   listingId,
   prefill,
   title = 'Đăng tin',
+  sent,
 }: PostListingFlowProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -190,7 +193,7 @@ export function PostListingFlow({
   const { session, getIdToken } = useAuth();
   const goBack = useGoBack({ pathname: '/stock/[id]', params: { id: itemId } });
 
-  const [step, setStep] = useState<Step>('listing');
+  const [step, setStep] = useState<Step>(sent ? 'done' : 'listing');
   const [chosenType, setType] = useState<ListingType>(initialType ?? 'sell');
   /** The area picked for this listing; absent, the listing keeps its own (edit) or takes the owner's (new). */
   const [areaPick, setAreaPick] = useState<{ location: OnboardingLocation; name: string } | null>(
@@ -218,7 +221,7 @@ export function PostListingFlow({
   );
   const [note, setNote] = useState(prefill?.handoverNote ?? '');
   const [outcome, setOutcome] = useState<'pending_review' | 'published' | 'scheduled'>(
-    'pending_review'
+    sent ?? 'pending_review'
   );
   const [confirmed, setConfirmed] = useState<[boolean, boolean]>([false, false]);
   const [levelsOpen, setLevelsOpen] = useState(false);
@@ -580,7 +583,17 @@ export function PostListingFlow({
           </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/stock/[id]/edit', params: { id: item.id } })}
+            onPress={() =>
+              router.push({
+                pathname: '/stock/[id]/edit',
+                // Editing a listing only to change the item: saving it ends on this listing's
+                // "Đã gửi bản sửa" screen.
+                params: {
+                  id: item.id,
+                  ...(from === 'edit' && listingId ? { after: 'listing', listing: listingId } : {}),
+                },
+              })
+            }
             className="h-[34px] justify-center rounded-[10px] bg-white px-3"
           >
             <AppText className="text-[13px] font-vn-bold text-[#1673D9]">Sửa</AppText>
@@ -993,6 +1006,8 @@ function MoneyField({
   large?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
+  // Set for one edit, to keep the caret where the person was typing; cleared by the next move.
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
   return (
     <View
       className={`flex-row items-center rounded-xl border-[1.5px] bg-white px-3 ${
@@ -1003,7 +1018,13 @@ function MoneyField({
         accessibilityLabel={label}
         keyboardType="number-pad"
         value={groupedDigits(value)}
-        onChangeText={(text) => onChange(digitsOnly(text))}
+        selection={selection}
+        onSelectionChange={() => setSelection(undefined)}
+        onChangeText={(text) => {
+          const edit = editMoney(value, text);
+          onChange(edit.digits);
+          setSelection({ start: edit.caret, end: edit.caret });
+        }}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="0"
