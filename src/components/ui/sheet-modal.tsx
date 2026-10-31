@@ -21,8 +21,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 /** Dragged further than this (points) or flicked faster than this (points/s): the sheet closes. */
 const CLOSE_DISTANCE = 110;
@@ -56,7 +56,7 @@ export function SheetModal({
   bottomPadding = 22,
   maxHeightRatio = 0.88,
 }: SheetModalProps) {
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { height: screenHeight } = useWindowDimensions();
   const translateY = useSharedValue(screenHeight);
   const sheetHeight = useSharedValue(screenHeight);
@@ -142,7 +142,7 @@ export function SheetModal({
               </GestureDetector>
               <View
                 className={`shrink ${contentClassName}`}
-                style={{ paddingBottom: bottomPadding + insets.bottom }}
+                style={{ paddingBottom: bottomPadding + bottomInset }}
               >
                 {children}
               </View>

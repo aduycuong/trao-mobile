@@ -12,7 +12,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { AuthError } from '@/components/auth/auth-ui';
 import { ScreenBar } from '@/components/navigation/screen-bar';
@@ -21,6 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { pickScreenshots, uploadScreenshot } from '@/services/help/feedback-upload';
 import { HELP_HOME_QUERY_KEY, postFeedback } from '@/services/help/help-api';
 import type { FeedbackKind } from '@/types/help';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 /** Screenshot tile and the add button: exact points (the web `h-24 w-16`), not rem classes. */
 const SHOT_SIZE = { width: 64, height: 96 } as const;
@@ -65,7 +65,7 @@ const KINDS: {
 /** Góp ý cho Trao (canvas Help, views "feedback" and "sent"). Needs sign-in. */
 export default function FeedbackScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const queryClient = useQueryClient();
   const { session, getIdToken } = useAuth();
   const [kind, setKind] = useState<FeedbackKind>('bug');
@@ -153,7 +153,7 @@ export default function FeedbackScreen() {
             Đội Trao đã nhận góp ý. Nếu cần hỏi thêm, Trao sẽ liên hệ qua email.
           </AppText>
         </View>
-        <View className="px-4 pt-2.5" style={{ paddingBottom: 16 + insets.bottom }}>
+        <View className="px-4 pt-2.5" style={{ paddingBottom: 16 + bottomInset }}>
           <Pressable
             accessibilityRole="button"
             onPress={back}
@@ -357,7 +357,7 @@ export default function FeedbackScreen() {
 
       <View
         className="border-t border-[#EEF2F6] px-4 pt-2.5"
-        style={{ paddingBottom: 16 + insets.bottom }}
+        style={{ paddingBottom: 16 + bottomInset }}
       >
         <Pressable
           accessibilityRole="button"

@@ -45,6 +45,7 @@ import {
   toggleInList,
   withForm,
 } from '@/utils/search-rules';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 /**
  * The search sheet (canvas Main, search open): the box, recent searches, form, category and the
@@ -54,6 +55,7 @@ import {
 export default function SearchEditorScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const queryClient = useQueryClient();
   const goBack = useGoBack('/');
   const { width } = useWindowDimensions();
@@ -338,7 +340,7 @@ export default function SearchEditorScreen() {
 
       <View
         className="flex-row gap-2.5 border-t border-[#E8ECF0] bg-white px-4 pt-3"
-        style={{ paddingBottom: 16 + insets.bottom }}
+        style={{ paddingBottom: 16 + bottomInset }}
       >
         <Pressable
           accessibilityRole="button"

@@ -29,6 +29,7 @@ import { DEAL_TYPE_LABEL } from '@/services/deals/deal-banner';
 import type { ReviewContext } from '@/types/deals';
 import { formatDayMonth } from '@/utils/format';
 import { StackSkeleton } from '@/components/ui/skeletons';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 function Star({ on, size }: { on: boolean; size: number }) {
   return (
@@ -96,7 +97,7 @@ export function ReviewScreen({ transactionId }: { transactionId: string }) {
 
 function ReviewBody({ context }: { context: ReviewContext }) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const queryClient = useQueryClient();
   const { getIdToken } = useAuth();
   const other = context.counterpart.name ?? 'Người kia';
@@ -221,7 +222,7 @@ function ReviewBody({ context }: { context: ReviewContext }) {
         </ScrollView>
         <View
           className="flex-row gap-2.5 border-t border-[#EEF2F6] bg-white px-4 pt-2.5"
-          style={{ paddingBottom: 16 + insets.bottom }}
+          style={{ paddingBottom: 16 + bottomInset }}
         >
           <Pressable
             accessibilityRole="button"
@@ -447,7 +448,7 @@ function ReviewBody({ context }: { context: ReviewContext }) {
 
       <View
         className="gap-1.5 border-t border-[#EEF2F6] bg-white px-4 pt-2.5"
-        style={{ paddingBottom: 16 + insets.bottom }}
+        style={{ paddingBottom: 16 + bottomInset }}
       >
         <Pressable
           accessibilityRole="button"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/app-text';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 export type ActionButton = {
   label: string;
@@ -14,11 +14,11 @@ export type ActionButton = {
 
 /** The bottom bar of the report and penalty screens (canvas Report, Penalty): 50px buttons. */
 export function ActionBar({ buttons }: { buttons: ActionButton[] }) {
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   return (
     <View
       className="flex-row gap-2.5 border-t border-[#EEF2F6] bg-white px-4 pt-2.5"
-      style={{ paddingBottom: 16 + insets.bottom }}
+      style={{ paddingBottom: 16 + bottomInset }}
     >
       {buttons.map((button) => {
         const outline = button.tone === 'outline';

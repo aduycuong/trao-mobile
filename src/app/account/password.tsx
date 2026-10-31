@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthButton, AuthError, AuthField } from '@/components/auth/auth-ui';
 import { ScreenBar } from '@/components/navigation/screen-bar';
 import { AppText } from '@/components/ui/app-text';
@@ -12,6 +11,7 @@ import {
   validateSetPassword,
   type AuthFieldErrors,
 } from '@/utils/auth-validation';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 type Errors = AuthFieldErrors & { currentPassword?: string };
 
@@ -21,7 +21,7 @@ type Errors = AuthFieldErrors & { currentPassword?: string };
  */
 export default function AccountPasswordScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { changePassword, setPassword: setNewPassword, canChangePassword } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
@@ -156,7 +156,7 @@ export default function AccountPasswordScreen() {
       </ScrollView>
       <View
         className="border-t border-[#EEF2F6] px-5 pt-3"
-        style={{ paddingBottom: 20 + insets.bottom }}
+        style={{ paddingBottom: 20 + bottomInset }}
       >
         <AuthButton
           label={canChangePassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}

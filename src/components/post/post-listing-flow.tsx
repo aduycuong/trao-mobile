@@ -60,6 +60,7 @@ import {
   type ListingDraft,
 } from '@/utils/listing-rules';
 import { StackSkeleton } from '@/components/ui/skeletons';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 type Step = 'listing' | 'check' | 'area' | 'done';
 
@@ -185,6 +186,7 @@ export function PostListingFlow({
   const router = useRouter();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { session, getIdToken } = useAuth();
   const goBack = useGoBack({ pathname: '/stock/[id]', params: { id: itemId } });
 
@@ -424,7 +426,7 @@ export function PostListingFlow({
             </View>
           </View>
         </ScrollView>
-        <View className="flex-row gap-2 px-4 pt-2.5" style={{ paddingBottom: 18 + insets.bottom }}>
+        <View className="flex-row gap-2 px-4 pt-2.5" style={{ paddingBottom: 18 + bottomInset }}>
           <BarButton label="Về trang chủ" tone="outline" onPress={() => router.replace('/')} />
           <BarButton
             label="Xem trong Tin đăng"
@@ -526,7 +528,7 @@ export function PostListingFlow({
         </ScrollView>
         <View
           className="gap-2 border-t border-[#E8ECF0] bg-white px-4 pt-2.5"
-          style={{ paddingBottom: 18 + insets.bottom }}
+          style={{ paddingBottom: 18 + bottomInset }}
         >
           <BarButton
             label="Đăng tin"
@@ -906,7 +908,7 @@ export function PostListingFlow({
 
       <View
         className="border-t border-[#E8ECF0] bg-white px-4 pt-2.5"
-        style={{ paddingBottom: 18 + insets.bottom }}
+        style={{ paddingBottom: 18 + bottomInset }}
       >
         <BarButton label="Tiếp: Kiểm tra" disabled={!canNext} onPress={() => setStep('check')} />
       </View>

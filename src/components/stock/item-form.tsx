@@ -56,6 +56,7 @@ import { formatClipDuration } from '@/utils/format';
 import { planPicks } from '@/utils/media-rules';
 import { sameMedia, tilesOf, type Tile } from '@/utils/item-form';
 import { StackSkeleton } from '@/components/ui/skeletons';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 const PLACEHOLDER =
   'Ví dụ: iPhone 13 128GB xanh, mua 2022, pin 89%, xước nhẹ cạnh dưới, kèm ốp và cáp. Mua dịp tốt nghiệp, giờ đổi máy nên bán lại.';
@@ -150,6 +151,7 @@ function ItemFormBody({
   const router = useRouter();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { session, getIdToken } = useAuth();
 
   const initial = item ? tilesOf(item) : { photos: [], videos: [] };
@@ -801,7 +803,7 @@ function ItemFormBody({
 
       <View
         className="flex-row gap-2 border-t border-[#E8ECF0] bg-white px-4 pt-2.5"
-        style={{ paddingBottom: 18 + insets.bottom }}
+        style={{ paddingBottom: 18 + bottomInset }}
       >
         {postFlow ? (
           <BarButton
