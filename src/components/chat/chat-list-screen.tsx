@@ -109,40 +109,43 @@ export function ChatListScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View
-        className="flex-row items-center gap-1.5 border-b border-[#EEF2F6] pl-4 pr-2"
-        style={{ height: 60 + insets.top, paddingTop: insets.top }}
-      >
-        <AppText accessibilityRole="header" className="flex-1 text-[20px] font-vn-bold">
-          Tin nhắn
-        </AppText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Tìm tin nhắn"
-          accessibilityState={{ selected: searching }}
-          onPress={() => {
-            setSearching((on) => !on);
-            setQuery('');
-          }}
-          className="h-11 w-11 items-center justify-center"
-        >
-          <Svg
-            width={21}
-            height={21}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#0F2440"
-            strokeWidth={2}
-            strokeLinecap="round"
+      {/* Same header as Kho đồ and Tin đăng: the safe area plus the web's pt-3. */}
+      <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
+        <View className="flex-row items-center pl-4 pr-2">
+          <AppText
+            accessibilityRole="header"
+            className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
           >
-            <Circle cx={11} cy={11} r={7} />
-            <Path d="M20 20l-4-4" />
-          </Svg>
-        </Pressable>
+            Tin nhắn
+          </AppText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tìm tin nhắn"
+            accessibilityState={{ selected: searching }}
+            onPress={() => {
+              setSearching((on) => !on);
+              setQuery('');
+            }}
+            className="h-11 w-11 items-center justify-center rounded-full"
+          >
+            <Svg
+              width={21}
+              height={21}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0F2440"
+              strokeWidth={2}
+              strokeLinecap="round"
+            >
+              <Circle cx={11} cy={11} r={7} />
+              <Path d="M20 20l-4-4" />
+            </Svg>
+          </Pressable>
+        </View>
       </View>
 
       {searching ? (
-        <View className="border-b border-[#F2F5F8] px-4 py-2.5">
+        <View className="px-4 pb-2 pt-1">
           <TextInput
             autoFocus
             value={query}
