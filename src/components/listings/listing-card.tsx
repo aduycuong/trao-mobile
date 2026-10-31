@@ -249,7 +249,8 @@ export function ListingCard({ listing, now, onMenu }: ListingCardProps) {
             </AppText>
           </View>
         ) : null}
-        {type === 'gift' ? (
+        {/* Only when someone has signed up: a card with no one yet shows nothing here. */}
+        {type === 'gift' && listing.registrationCount ? (
           <View className="flex-row items-start gap-1.5 rounded-[10px] bg-[#FFF4D6] px-2 py-[7px]">
             <View className="mt-px">
               <Svg
@@ -266,9 +267,7 @@ export function ListingCard({ listing, now, onMenu }: ListingCardProps) {
               </Svg>
             </View>
             <AppText className="flex-1 text-[12px] leading-[16px] text-[#8A5A00]">
-              {listing.registrationCount
-                ? `${listing.registrationCount} người đăng ký`
-                : 'Chưa có ai đăng ký'}
+              {listing.registrationCount} người đăng ký
             </AppText>
           </View>
         ) : null}
