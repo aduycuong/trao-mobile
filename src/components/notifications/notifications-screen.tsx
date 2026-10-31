@@ -23,6 +23,7 @@ import {
 } from '@/services/notifications/notifications-api';
 import { routeForNotification } from '@/services/push/push-routing';
 import type { NotificationItem } from '@/types/notifications';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const GEAR_PATH =
   'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z';
@@ -194,7 +195,8 @@ export function NotificationsScreen() {
         horizontal
         accessibilityRole="tablist"
         showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0 }}
+        // Beside the list, which takes the rest: the chips keep their full height and padding.
+        style={{ flexGrow: 0, flexShrink: 0 }}
         contentContainerClassName="gap-2 px-4 py-2.5"
         className="border-b border-[#F2F5F8]"
       >
@@ -202,26 +204,14 @@ export function NotificationsScreen() {
           const on = id === filter;
           const count = id === 'all' ? 0 : (counts?.[id] ?? 0);
           return (
-            <Pressable
+            <FilterChip
               key={id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              label={label}
+              on={on}
               onPress={() => setFilter(id)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText
-                className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : 'text-[#0F2440]'}`}
-              >
-                {label}
-              </AppText>
-              {count > 0 ? (
-                <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F0533A] px-[5px]">
-                  <AppText className="text-[11px] font-vn-bold text-white">{count}</AppText>
-                </View>
-              ) : null}
-            </Pressable>
+              count={count > 0 ? count : undefined}
+              badge="alert"
+            />
           );
         })}
       </ScrollView>
