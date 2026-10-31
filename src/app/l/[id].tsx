@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useIsFocused } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -113,6 +113,7 @@ export default function ListingPageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const focused = useIsFocused();
   const { scrollY, onScroll, solid } = useStickyScroll(400);
   const queryClient = useQueryClient();
   const goBack = useGoBack('/');
@@ -339,8 +340,9 @@ export default function ListingPageScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Light text over the picture, dark once the bar is white. */}
-      <StatusBar style={solid ? 'dark' : 'light'} />
+      {/* Light text over the picture, dark once the bar is white. Only while this screen is the
+          one on show: a screen pushed over it (the edit forms) would otherwise inherit it. */}
+      {focused ? <StatusBar style={solid ? 'dark' : 'light'} /> : null}
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
