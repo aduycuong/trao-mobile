@@ -20,11 +20,7 @@ import { MediaGallery, RoundOverlayButton } from '@/components/stock/media-galle
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { ErrorBox } from '@/components/ui/form-controls';
-import {
-  ICON_CHEVRON_LEFT,
-  ICON_CHEVRON_RIGHT,
-  PathIcon,
-} from '@/components/ui/path-icon';
+import { ICON_CHEVRON_LEFT, ICON_CHEVRON_RIGHT, PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { useOpenChat } from '@/hooks/useOpenChat';
