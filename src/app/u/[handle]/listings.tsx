@@ -131,7 +131,7 @@ export default function UserListingsScreen() {
           ListHeaderComponent={header}
           ListFooterComponent={
             <View className="px-4 pb-6 pt-2">
-              {listings.isPending ? <CardGridSkeleton /> : null}
+              {listings.isPending ? <CardGridSkeleton className="" /> : null}
               {listings.error ? (
                 <Pressable onPress={() => listings.refetch()}>
                   <AppText className="py-4 text-center text-[14px] font-vn-semibold text-[#B42318] underline">

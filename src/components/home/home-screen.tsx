@@ -318,7 +318,7 @@ export function HomeScreen() {
         ListFooterComponent={
           <View className="min-h-40 bg-white px-8 pt-4">
             {latest.isFetchingNextPage || (latest.isPending && !!excludeIds) ? (
-              <CardGridSkeleton count={2} />
+              <CardGridSkeleton count={2} className="-mx-4" />
             ) : null}
             {finished ? (
               <AppText className="pt-2 text-center text-[13px] text-[#5A6772]">
