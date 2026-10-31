@@ -23,7 +23,6 @@ import { ErrorBox } from '@/components/ui/form-controls';
 import {
   ICON_CHEVRON_LEFT,
   ICON_CHEVRON_RIGHT,
-  ICON_PENCIL,
   PathIcon,
 } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
@@ -567,32 +566,6 @@ export default function ListingPageScreen() {
                 )
               ) : null}
             </View>
-          </View>
-        ) : tools ? (
-          <View className="px-4 pt-4">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ disabled: !tools.canEdit }}
-              disabled={!tools.canEdit}
-              onPress={() =>
-                router.push({ pathname: '/listings/[id]/edit', params: { id: tools.id } })
-              }
-              className={`h-[50px] flex-row items-center justify-center gap-2 rounded-[14px] ${
-                tools.canEdit ? 'bg-[#1673D9]' : 'bg-[#E1E7EE]'
-              }`}
-            >
-              <PathIcon d={ICON_PENCIL} size={18} color={tools.canEdit ? '#FFFFFF' : '#8A96A3'} />
-              <AppText
-                className={`text-[15px] font-vn-bold ${tools.canEdit ? 'text-white' : 'text-[#8A96A3]'}`}
-              >
-                Sửa tin
-              </AppText>
-            </Pressable>
-            {!tools.canEdit && tools.editBlockedReason ? (
-              <AppText className="mt-1.5 text-center text-[12.5px] text-[#5A6772]">
-                {tools.editBlockedReason}
-              </AppText>
-            ) : null}
           </View>
         ) : null}
 
