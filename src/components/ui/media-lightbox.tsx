@@ -38,7 +38,10 @@ import {
 export type LightboxItem =
   | {
       kind: 'photo';
-      uri: string;
+      /** Address of the full photo; left out when `useSource` finds it from `id`. */
+      uri?: string | null;
+      /** What `useSource` looks the address up by (the attachment id of a chat image). */
+      id?: string | null;
       /** Small version shown until the full one has loaded. */
       thumbUri?: string | null;
       /** Size in pixels: the double tap goes to the actual size with it. */
@@ -54,6 +57,16 @@ export type LightboxItem =
       durationMs?: number | null;
       caption?: string | null;
     };
+
+type PhotoItem = Extract<LightboxItem, { kind: 'photo' }>;
+
+/** Where a photo is loaded from: the full address, a small one for the wait, and a retry. */
+export type PhotoSource = { uri: string | null; thumbUri?: string | null; reload?: () => void };
+
+/** The default: the addresses are in the item. A custom hook can look them up instead. */
+function useItemSource(item: PhotoItem): PhotoSource {
+  return { uri: item.uri ?? null, thumbUri: item.thumbUri };
+}
 
 /** Dragged further than this (points) or flicked faster than this (points/s): the lightbox closes. */
 const DISMISS_DISTANCE = 120;
@@ -81,7 +94,8 @@ function settle(value: SharedValue<number>, velocity: number, limit: number) {
 }
 
 type PhotoPageProps = {
-  item: Extract<LightboxItem, { kind: 'photo' }>;
+  item: PhotoItem;
+  useSource: (item: PhotoItem) => PhotoSource;
   width: number;
   height: number;
   /** 1 when the lightbox is at rest, down to 0 while it is dragged away. */
@@ -94,6 +108,7 @@ type PhotoPageProps = {
 /** One photo that pinches, double-taps, pans while zoomed and drags down to close. */
 function PhotoPage({
   item,
+  useSource,
   width,
   height,
   backdrop,
@@ -101,6 +116,8 @@ function PhotoPage({
   onTap,
   onDismiss,
 }: PhotoPageProps) {
+  const source = useSource(item);
+  const [retried, setRetried] = useState(false);
   const view = { width, height };
   const natural = item.width && item.height ? { width: item.width, height: item.height } : null;
   const fitted = fitSize(natural, view);
@@ -252,8 +269,8 @@ function PhotoPage({
     ],
   }));
 
-  const placeholder = item.thumbUri
-    ? { uri: item.thumbUri }
+  const placeholder = source.thumbUri
+    ? { uri: source.thumbUri }
     : item.blurhash
       ? { blurhash: item.blurhash }
       : undefined;
@@ -263,7 +280,13 @@ function PhotoPage({
       <View style={{ width, height }}>
         <Animated.View style={[{ width, height }, photoStyle]}>
           <Image
-            source={{ uri: item.uri }}
+            source={source.uri ? { uri: source.uri } : undefined}
+            onError={() => {
+              // The signed address may have run out: ask for a new one once.
+              if (retried) return;
+              setRetried(true);
+              source.reload?.();
+            }}
             placeholder={placeholder}
             placeholderContentFit="contain"
             contentFit="contain"
@@ -334,6 +357,8 @@ type MediaLightboxProps = {
   items: LightboxItem[];
   startIndex: number;
   onClose: () => void;
+  /** A hook that finds the address of a photo (chat images are looked up by id). */
+  useSource?: (item: PhotoItem) => PhotoSource;
 };
 
 /**
@@ -341,7 +366,12 @@ type MediaLightboxProps = {
  * pinch or double-tap to zoom (to the actual size), drag a photo down or up to close, tap to hide
  * the bars. The caption of the one on show sits under it.
  */
-export function MediaLightbox({ items, startIndex, onClose }: MediaLightboxProps) {
+export function MediaLightbox({
+  items,
+  startIndex,
+  onClose,
+  useSource = useItemSource,
+}: MediaLightboxProps) {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const first = Math.min(Math.max(startIndex, 0), Math.max(items.length - 1, 0));
@@ -366,7 +396,7 @@ export function MediaLightbox({ items, startIndex, onClose }: MediaLightboxProps
         <FlatList
           data={items}
           keyExtractor={(entry, at) =>
-            `${at}-${entry.kind === 'photo' ? entry.uri : entry.videoUri}`
+            `${at}-${entry.kind === 'photo' ? (entry.uri ?? entry.id ?? '') : entry.videoUri}`
           }
           horizontal
           pagingEnabled
@@ -382,6 +412,7 @@ export function MediaLightbox({ items, startIndex, onClose }: MediaLightboxProps
             item.kind === 'photo' ? (
               <PhotoPage
                 item={item}
+                useSource={useSource}
                 width={width}
                 height={height}
                 backdrop={backdrop}
