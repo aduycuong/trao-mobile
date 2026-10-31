@@ -12,11 +12,20 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import { CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
 import { AppText } from '@/components/ui/app-text';
+import { MediaLightbox, type LightboxItem } from '@/components/ui/media-lightbox';
 import type { ItemPhotoView, ItemVideoView } from '@/types/stock';
 import { formatClipDuration } from '@/utils/format';
 
 type Slide =
-  | { kind: 'photo'; url: string; thumb: string; caption: string | null }
+  | {
+      kind: 'photo';
+      url: string;
+      thumb: string;
+      caption: string | null;
+      width: number | null;
+      height: number | null;
+      blurhash: string | null;
+    }
   | {
       kind: 'video';
       url: string;
@@ -49,12 +58,16 @@ export function MediaGallery({
   const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState<number | null>(null);
+  const [lightbox, setLightbox] = useState<number | null>(null);
   const slides: Slide[] = [
     ...photos.map((photo) => ({
       kind: 'photo' as const,
       url: photo.url,
       thumb: photo.thumbUrl,
       caption: photo.caption,
+      width: photo.width,
+      height: photo.height,
+      blurhash: photo.blurhash,
     })),
     ...videos.map((video) => ({
       kind: 'video' as const,
@@ -65,6 +78,26 @@ export function MediaGallery({
     })),
   ];
   const slide = slides[Math.min(index, slides.length - 1)];
+  // The same photos and clips, in the order of the gallery, for the full-screen viewer.
+  const lightboxItems: LightboxItem[] = slides.map((entry) =>
+    entry.kind === 'photo'
+      ? {
+          kind: 'photo',
+          uri: entry.url,
+          thumbUri: entry.thumb,
+          width: entry.width,
+          height: entry.height,
+          blurhash: entry.blurhash,
+          caption: entry.caption,
+        }
+      : {
+          kind: 'video',
+          videoUri: entry.url,
+          posterUri: entry.thumb,
+          durationMs: entry.durationMs,
+          caption: entry.caption,
+        }
+  );
   const scroller = useRef<ScrollView>(null);
 
   function onScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -94,8 +127,9 @@ export function MediaGallery({
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={entry.kind === 'video' ? 'Phát video' : 'Ảnh'}
-                    disabled={entry.kind !== 'video'}
-                    onPress={() => setPlaying(position)}
+                    onPress={() =>
+                      entry.kind === 'video' ? setPlaying(position) : setLightbox(position)
+                    }
                     style={{ width, height }}
                   >
                     <Image
@@ -200,6 +234,14 @@ export function MediaGallery({
             </Pressable>
           ))}
         </ScrollView>
+      ) : null}
+
+      {lightbox !== null ? (
+        <MediaLightbox
+          items={lightboxItems}
+          startIndex={lightbox}
+          onClose={() => setLightbox(null)}
+        />
       ) : null}
     </View>
   );

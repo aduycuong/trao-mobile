@@ -105,12 +105,13 @@ type ChatComposerProps = {
 
 function DraftThumb({ item, onRemove }: { item: LocalMediaItem; onRemove: () => void }) {
   return (
-    <View className="h-16 w-16">
+    <View style={{ width: 64, height: 64 }}>
       <Image
         source={{ uri: item.thumbUri }}
         accessibilityLabel="Ảnh sắp gửi"
         contentFit="cover"
-        className="h-16 w-16 rounded-[14px] bg-[#F1F4F7]"
+        // expo-image does not read `className`, so a size given that way left it at zero.
+        style={{ width: 64, height: 64, borderRadius: 14, backgroundColor: '#F1F4F7' }}
       />
       <Pressable
         accessibilityRole="button"
