@@ -128,6 +128,7 @@ function StockItemContent() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey }),
       queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY }),
     ]);
   }
 
@@ -136,6 +137,7 @@ function StockItemContent() {
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey });
       await queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY });
       router.replace('/stock');
     },
     onError: (caught) => {
@@ -810,7 +812,7 @@ function TagSheet({
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
   const [created, setCreated] = useState<string[]>([]);
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: [...MY_TAGS_QUERY_KEY, session?.uid],
     queryFn: async () => fetchMyTags(await getIdToken()),
     enabled: !!session,
@@ -867,6 +869,11 @@ function TagSheet({
 
   return (
     <BottomSheet title="Gắn tag" onClose={onClose}>
+      {error ? (
+        <AppText accessibilityRole="alert" className="text-[13px] text-[#B42318]">
+          {error.message}
+        </AppText>
+      ) : null}
       <View className="flex-row flex-wrap gap-2">
         {names.map((name) => {
           const on = selected.includes(name);

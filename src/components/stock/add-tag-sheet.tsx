@@ -6,7 +6,12 @@ import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { BarButton, Checkbox } from '@/components/ui/form-controls';
 import { useAuth } from '@/hooks/useAuth';
-import { fetchMyItems, updateMyItem } from '@/services/stock/items-api';
+import {
+  fetchMyItems,
+  fetchMyTags,
+  MY_TAGS_QUERY_KEY,
+  updateMyItem,
+} from '@/services/stock/items-api';
 import { ITEM_PAGE_MAX_SIZE, ITEM_TAGS_MAX_COUNT, ITEM_TAG_MAX_LENGTH } from '@/types/stock';
 import { StackSkeleton } from '@/components/ui/skeletons';
 
@@ -26,8 +31,14 @@ export function AddTagSheet({ onClose, onAdded }: AddTagSheetProps) {
     queryFn: async () => fetchMyItems(await getIdToken(), { offset: 0, limit: ITEM_PAGE_MAX_SIZE }),
   });
 
+  // Every tag the user has made, also the ones on no item (the list of items has only those in use).
+  const { data: tagData } = useQuery({
+    queryKey: [...MY_TAGS_QUERY_KEY, session?.uid],
+    queryFn: async () => fetchMyTags(await getIdToken()),
+    enabled: !!session,
+  });
   const tag = name.trim().toLowerCase();
-  const known = data?.tags ?? [];
+  const known = tagData?.tags ?? [];
   const rows = data?.items ?? [];
   const hasTag = (row: (typeof rows)[number]) => row.tags.some((entry) => entry.tag === tag);
   const full = (row: (typeof rows)[number]) => row.tags.length >= ITEM_TAGS_MAX_COUNT;
