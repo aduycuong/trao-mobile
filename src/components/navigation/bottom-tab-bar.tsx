@@ -38,12 +38,16 @@ export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
     listings: summary.data?.newOffers ?? 0,
   };
   const activeName = state.routes[state.index]?.name;
+  // The labels sit close to the bottom edge: the home indicator (about 34 high on an iPhone, a thin
+  // bar near the very bottom) only needs the lower part of the safe area, so 12 of it is given
+  // back, but never less than 10 above the edge.
+  const paddingBottom = Math.max(insets.bottom - 12, 10);
 
   return (
     <View
       accessibilityRole="tablist"
       className="flex-row border-t border-[#E8ECF0] bg-white px-1 pt-1.5"
-      style={{ paddingBottom: 12 + insets.bottom }}
+      style={{ paddingBottom }}
     >
       {TABS.map((tab) => {
         const active = tab.name === activeName;
