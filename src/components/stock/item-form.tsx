@@ -809,7 +809,7 @@ function ItemFormBody({
           <BarButton
             label="Chỉ lưu vào Kho"
             tone="outline"
-            disabled={!canSave}
+            disabled={!canSave || save.isPending}
             loading={save.isPending && save.variables === 'stock'}
             onPress={() => submitForm('stock')}
           />
@@ -817,8 +817,10 @@ function ItemFormBody({
         <BarButton
           label={item ? 'Lưu thay đổi' : postFlow ? 'Tiếp: Đăng tin' : 'Thêm vào Kho đồ'}
           flex={1.3}
-          disabled={!canSave}
-          loading={save.isPending && save.variables !== 'stock'}
+          disabled={!canSave || save.isPending}
+          // Without the second button (editing, or adding outside the post flow) every save is
+          // `'stock'`, so this button shows the progress then too.
+          loading={save.isPending && (!postFlow || save.variables !== 'stock')}
           onPress={() => submitForm(postFlow ? 'post' : 'stock')}
         />
       </View>
