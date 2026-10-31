@@ -15,6 +15,7 @@ import {
   type ChatListRowData,
 } from '@/services/chat/chat-list';
 import { describeDealBanner } from '@/services/deals/deal-banner';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const FILTERS: { id: ChatListFilter; label: string }[] = [
   { id: 'all', label: 'Tất cả' },
@@ -168,26 +169,14 @@ export function ChatListScreen() {
           const on = filter === id;
           const count = id === 'deal' ? dealCount : 0;
           return (
-            <Pressable
+            <FilterChip
               key={id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              label={label}
+              on={on}
               onPress={() => setFilter(id)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText
-                className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : 'text-[#0F2440]'}`}
-              >
-                {label}
-              </AppText>
-              {count > 0 ? (
-                <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FFC22E] px-[5px]">
-                  <AppText className="text-[11px] font-vn-bold text-[#3D2A00]">{count}</AppText>
-                </View>
-              ) : null}
-            </Pressable>
+              count={count > 0 ? count : undefined}
+              badge="gold"
+            />
           );
         })}
       </View>

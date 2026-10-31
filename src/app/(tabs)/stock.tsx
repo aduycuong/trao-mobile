@@ -8,7 +8,6 @@ import { CatIcon } from '@/components/icons/cat-icon';
 import { AddTagSheet } from '@/components/stock/add-tag-sheet';
 import { ItemThumb } from '@/components/stock/item-thumb';
 import { NOTE_STYLE } from '@/components/stock/note-style';
-import { TagChip } from '@/components/stock/tag-chip';
 import { AppText } from '@/components/ui/app-text';
 import { ErrorBox, SkeletonBlock } from '@/components/ui/form-controls';
 import {
@@ -25,6 +24,7 @@ import { fetchMyItems, MY_ITEMS_QUERY_KEY } from '@/services/stock/items-api';
 import type { ItemListRow } from '@/types/stock';
 import { getAsyncStorage } from '@/utils/async-storage';
 import { StockRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const INTRO_HIDDEN_KEY = 'trao.stock-intro-hidden';
 /** While a photo or video of an item is being checked, the list is read again at this pace. */
@@ -166,11 +166,17 @@ export default function StockTab() {
           horizontal
           accessibilityRole="tablist"
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2 pb-3.5 pl-4 pr-4 pt-2"
+          contentContainerClassName="gap-2 px-4 py-2.5"
+          className="border-b border-[#F2F5F8]"
         >
-          <TagChip label="Tất cả" count={allCount} on={tag === null} onPress={() => setTag(null)} />
+          <FilterChip
+            label="Tất cả"
+            count={allCount}
+            on={tag === null}
+            onPress={() => setTag(null)}
+          />
           {first.tags.map((entry) => (
-            <TagChip
+            <FilterChip
               key={entry.tag}
               label={entry.tag}
               count={entry.count}
@@ -182,7 +188,7 @@ export default function StockTab() {
           <Pressable
             accessibilityRole="button"
             onPress={() => setAddingTag(true)}
-            className="h-9 flex-row items-center gap-1 rounded-full border-[1.5px] border-dashed border-[#9CC3F0] px-3.5"
+            className="h-[34px] flex-row items-center gap-1 rounded-full border-[1.5px] border-dashed border-[#9CC3F0] px-3.5"
           >
             <PathIcon d={ICON_PLUS} size={14} color="#1673D9" strokeWidth={2.6} />
             <AppText className="text-[13.5px] font-vn-semibold text-[#1673D9]">Tag</AppText>

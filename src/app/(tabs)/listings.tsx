@@ -22,6 +22,7 @@ import type {
   ListingSegment,
 } from '@/types/listings';
 import { ListingRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const SEGMENTS: { id: ListingSegment; label: string }[] = [
   { id: 'draft', label: 'Chờ duyệt' },
@@ -169,36 +170,14 @@ export default function ListingsTab() {
           const on = entry.id === segment;
           const n = first?.counts[entry.id] ?? 0;
           return (
-            <Pressable
+            <FilterChip
               key={entry.id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              label={entry.label}
+              on={on}
               onPress={() => setSegment(entry.id)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText
-                className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : 'text-[#0F2440]'}`}
-              >
-                {entry.label}
-              </AppText>
-              {n > 0 ? (
-                <View
-                  className={`h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] ${
-                    entry.id === 'draft' ? 'bg-[#FFC22E]' : on ? 'bg-white/20' : 'bg-[#EEF2F6]'
-                  }`}
-                >
-                  <AppText
-                    className={`text-[11px] font-vn-bold ${
-                      entry.id === 'draft' ? 'text-[#3D2A00]' : on ? 'text-white' : 'text-[#33414D]'
-                    }`}
-                  >
-                    {n}
-                  </AppText>
-                </View>
-              ) : null}
-            </Pressable>
+              count={n > 0 ? n : undefined}
+              badge={entry.id === 'draft' ? 'gold' : 'default'}
+            />
           );
         })}
       </ScrollView>
