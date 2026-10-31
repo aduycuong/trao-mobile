@@ -1,8 +1,8 @@
 import React from 'react';
-import { Modal, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { AppText } from '@/components/ui/app-text';
+import { SheetModal } from '@/components/ui/sheet-modal';
 
 type ProfileMoreSheetProps = {
   onClose: () => void;
@@ -23,7 +23,6 @@ type Row = {
 
 /** Options of someone else's profile (canvas Profile, sheet "more"). */
 export function ProfileMoreSheet({ onClose, onShare, onBlock, onReport }: ProfileMoreSheetProps) {
-  const insets = useSafeAreaInsets();
   const rows: Row[] = [
     {
       label: 'Chia sẻ hồ sơ',
@@ -55,54 +54,39 @@ export function ProfileMoreSheet({ onClose, onShare, onBlock, onReport }: Profil
   ];
 
   return (
-    <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View className="flex-1 justify-end">
+    <SheetModal onClose={onClose} contentClassName="px-3">
+      {rows.map((row) => (
         <Pressable
-          accessibilityLabel="Đóng"
-          onPress={onClose}
-          className="absolute inset-0"
-          style={{ backgroundColor: 'rgba(15,36,64,0.45)' }}
-        />
-        <View
-          accessibilityViewIsModal
-          className="rounded-t-[26px] bg-white px-3 pt-2.5"
-          style={{ paddingBottom: 22 + insets.bottom }}
+          key={row.label}
+          accessibilityRole="button"
+          onPress={row.onPress}
+          className="flex-row items-center gap-3.5 rounded-xl px-2 py-3"
         >
-          <View className="mb-2 h-1 w-10 self-center rounded-full bg-[#D5DCE3]" />
-          {rows.map((row) => (
-            <Pressable
-              key={row.label}
-              accessibilityRole="button"
-              onPress={row.onPress}
-              className="flex-row items-center gap-3.5 rounded-xl px-2 py-3"
+          <View
+            className="h-[38px] w-[38px] items-center justify-center rounded-[11px]"
+            style={{ backgroundColor: row.bg }}
+          >
+            <Svg
+              width={19}
+              height={19}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={row.ink}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <View
-                className="h-[38px] w-[38px] items-center justify-center rounded-[11px]"
-                style={{ backgroundColor: row.bg }}
-              >
-                <Svg
-                  width={19}
-                  height={19}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={row.ink}
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <Path d={row.icon} />
-                </Svg>
-              </View>
-              <View className="flex-1 gap-px">
-                <AppText className="text-[15px] font-vn-semibold" style={{ color: row.color }}>
-                  {row.label}
-                </AppText>
-                <AppText className="text-[12.5px] text-[#5A6772]">{row.sub}</AppText>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-    </Modal>
+              <Path d={row.icon} />
+            </Svg>
+          </View>
+          <View className="flex-1 gap-px">
+            <AppText className="text-[15px] font-vn-semibold" style={{ color: row.color }}>
+              {row.label}
+            </AppText>
+            <AppText className="text-[12.5px] text-[#5A6772]">{row.sub}</AppText>
+          </View>
+        </Pressable>
+      ))}
+    </SheetModal>
   );
 }
