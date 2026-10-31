@@ -15,6 +15,7 @@ import {
   type ChatListRowData,
 } from '@/services/chat/chat-list';
 import { describeDealBanner } from '@/services/deals/deal-banner';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const FILTERS: { id: ChatListFilter; label: string }[] = [
   { id: 'all', label: 'Tất cả' },
@@ -109,40 +110,43 @@ export function ChatListScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View
-        className="flex-row items-center gap-1.5 border-b border-[#EEF2F6] pl-4 pr-2"
-        style={{ height: 60 + insets.top, paddingTop: insets.top }}
-      >
-        <AppText accessibilityRole="header" className="flex-1 text-[20px] font-vn-bold">
-          Tin nhắn
-        </AppText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Tìm tin nhắn"
-          accessibilityState={{ selected: searching }}
-          onPress={() => {
-            setSearching((on) => !on);
-            setQuery('');
-          }}
-          className="h-11 w-11 items-center justify-center"
-        >
-          <Svg
-            width={21}
-            height={21}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#0F2440"
-            strokeWidth={2}
-            strokeLinecap="round"
+      {/* Same header as Kho đồ and Tin đăng: the safe area plus the web's pt-3. */}
+      <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
+        <View className="flex-row items-center pl-4 pr-2">
+          <AppText
+            accessibilityRole="header"
+            className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
           >
-            <Circle cx={11} cy={11} r={7} />
-            <Path d="M20 20l-4-4" />
-          </Svg>
-        </Pressable>
+            Tin nhắn
+          </AppText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Tìm tin nhắn"
+            accessibilityState={{ selected: searching }}
+            onPress={() => {
+              setSearching((on) => !on);
+              setQuery('');
+            }}
+            className="h-11 w-11 items-center justify-center rounded-full"
+          >
+            <Svg
+              width={21}
+              height={21}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0F2440"
+              strokeWidth={2}
+              strokeLinecap="round"
+            >
+              <Circle cx={11} cy={11} r={7} />
+              <Path d="M20 20l-4-4" />
+            </Svg>
+          </Pressable>
+        </View>
       </View>
 
       {searching ? (
-        <View className="border-b border-[#F2F5F8] px-4 py-2.5">
+        <View className="px-4 pb-2 pt-1">
           <TextInput
             autoFocus
             value={query}
@@ -165,26 +169,14 @@ export function ChatListScreen() {
           const on = filter === id;
           const count = id === 'deal' ? dealCount : 0;
           return (
-            <Pressable
+            <FilterChip
               key={id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              label={label}
+              on={on}
               onPress={() => setFilter(id)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText
-                className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : 'text-[#0F2440]'}`}
-              >
-                {label}
-              </AppText>
-              {count > 0 ? (
-                <View className="h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FFC22E] px-[5px]">
-                  <AppText className="text-[11px] font-vn-bold text-[#3D2A00]">{count}</AppText>
-                </View>
-              ) : null}
-            </Pressable>
+              count={count > 0 ? count : undefined}
+              badge="gold"
+            />
           );
         })}
       </View>

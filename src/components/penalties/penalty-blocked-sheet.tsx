@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Modal, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import { PenaltyCardSwatch } from '@/components/penalties/penalty-card-swatch';
 import { AppText } from '@/components/ui/app-text';
+import { SheetModal } from '@/components/ui/sheet-modal';
 import { blockedCopy, PENALTY_LOOK } from '@/services/penalties/penalty-rules';
 import type { ActiveCard, PenaltyAction } from '@/types/penalties';
 
@@ -23,7 +23,6 @@ export function PenaltyBlockedSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const copy = blockedCopy(card, action);
 
   function primary() {
@@ -33,20 +32,10 @@ export function PenaltyBlockedSheet({
   }
 
   return (
-    <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityLabel="Đóng"
-          onPress={onClose}
-          className="absolute inset-0"
-          style={{ backgroundColor: 'rgba(15,36,64,0.5)' }}
-        />
-        <View
-          accessibilityViewIsModal
-          className="gap-3.5 rounded-t-[26px] bg-white px-5 pt-2.5"
-          style={{ paddingBottom: 22 + insets.bottom }}
-        >
-          <View className="h-1 w-10 self-center rounded-full bg-[#D5DCE3]" />
+    <SheetModal
+      onClose={onClose}
+      header={
+        <View className="pb-3.5">
           <View className="flex-row items-start gap-3.5">
             <View style={{ marginTop: 2 }}>
               <PenaltyCardSwatch
@@ -68,27 +57,28 @@ export function PenaltyBlockedSheet({
               <AppText className="text-[14px] leading-[21.7px] text-[#33414D]">{copy.body}</AppText>
             </View>
           </View>
-          <View className="gap-2.5">
-            <Pressable
-              accessibilityRole="button"
-              onPress={primary}
-              className="h-[50px] items-center justify-center rounded-[14px] bg-[#1673D9]"
-            >
-              <AppText className="text-[15px] font-vn-bold text-white">{copy.cta}</AppText>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                onClose();
-                router.push({ pathname: '/penalty/[id]', params: { id: card.id } });
-              }}
-              className="h-[50px] items-center justify-center rounded-[14px] bg-[#F1F7FE]"
-            >
-              <AppText className="text-[15px] font-vn-semibold">Xem thẻ phạt</AppText>
-            </Pressable>
-          </View>
         </View>
+      }
+    >
+      <View className="gap-2.5">
+        <Pressable
+          accessibilityRole="button"
+          onPress={primary}
+          className="h-[50px] items-center justify-center rounded-[14px] bg-[#1673D9]"
+        >
+          <AppText className="text-[15px] font-vn-bold text-white">{copy.cta}</AppText>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            onClose();
+            router.push({ pathname: '/penalty/[id]', params: { id: card.id } });
+          }}
+          className="h-[50px] items-center justify-center rounded-[14px] bg-[#F1F7FE]"
+        >
+          <AppText className="text-[15px] font-vn-semibold">Xem thẻ phạt</AppText>
+        </Pressable>
       </View>
-    </Modal>
+    </SheetModal>
   );
 }

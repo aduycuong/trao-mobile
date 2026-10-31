@@ -3,9 +3,9 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
 import { TabIcon } from '@/components/icons/tab-icon';
-import { TabHeader } from '@/components/navigation/tab-header';
 import { PostStartSheet } from '@/components/post/post-start-sheet';
 import { ItemThumb } from '@/components/stock/item-thumb';
 import { AppText } from '@/components/ui/app-text';
@@ -22,6 +22,7 @@ import type {
   ListingSegment,
 } from '@/types/listings';
 import { ListingRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const SEGMENTS: { id: ListingSegment; label: string }[] = [
   { id: 'draft', label: 'Chờ duyệt' },
@@ -71,6 +72,7 @@ const EMPTY_TEXT: Record<ListingSegment, { title: string; text: string }> = {
 
 /** The Tin đăng tab (canvas GroupList, kind "listings"): the owner's listings by segment and group. */
 export default function ListingsTab() {
+  const insets = useSafeAreaInsets();
   const { session, getIdToken } = useAuth();
   const postGuard = usePenaltyGuard();
   const [segment, setSegment] = useState<ListingSegment>('open');
@@ -107,126 +109,103 @@ export default function ListingsTab() {
   const total = first ? first.counts.draft + first.counts.open + first.counts.closed : 0;
   const empty = total === 0 ? EMPTY_TEXT.open : EMPTY_TEXT[segment];
 
-  const header = (
-    <View>
-      <TabHeader />
-      <View className="mt-1 rounded-t-[26px] bg-white pt-[18px]">
-        <View className="flex-row items-center pl-4 pr-2">
-          <AppText
-            accessibilityRole="header"
-            className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
-          >
-            Tin đăng
-          </AppText>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Tìm trong tin đăng"
-            accessibilityState={{ selected: searching }}
-            onPress={() => {
-              setSearching((on) => !on);
-              if (searching) setText('');
-            }}
-            className="h-11 w-11 items-center justify-center rounded-full"
-          >
-            <Svg
-              width={21}
-              height={21}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#0F2440"
-              strokeWidth={2}
-              strokeLinecap="round"
-            >
-              <Circle cx={11} cy={11} r={7} />
-              <Path d="M20 20l-4-4" />
-            </Svg>
-          </Pressable>
-        </View>
-
-        {searching ? (
-          <View className="px-4 pb-2 pt-1">
-            <TextInput
-              autoFocus
-              accessibilityLabel="Tìm trong tin đăng"
-              value={text}
-              onChangeText={setText}
-              placeholder="Tìm tên món…"
-              placeholderTextColor="#8896A3"
-              returnKeyType="search"
-              className="h-11 rounded-[14px] border-[1.5px] border-[#D5DDE5] bg-white px-3.5 font-vn text-[15px] text-[#0F2440]"
-            />
-          </View>
-        ) : null}
-
-        <ScrollView
-          horizontal
-          accessibilityRole="tablist"
-          showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2 px-4 py-2.5"
-          className="border-b border-[#F2F5F8]"
+  const stickyHeader = (
+    // Stays put while the list scrolls, like the chat list.
+    <View className="bg-white" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-row items-center pl-4 pr-2">
+        <AppText
+          accessibilityRole="header"
+          className="flex-1 text-[20px] font-vn-bold tracking-[-0.2px]"
         >
-          {SEGMENTS.map((entry) => {
-            const on = entry.id === segment;
-            const n = first?.counts[entry.id] ?? 0;
-            return (
-              <Pressable
-                key={entry.id}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: on }}
-                onPress={() => setSegment(entry.id)}
-                className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                  on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-                }`}
-              >
-                <AppText
-                  className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : 'text-[#0F2440]'}`}
-                >
-                  {entry.label}
-                </AppText>
-                {n > 0 ? (
-                  <View
-                    className={`h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] ${
-                      entry.id === 'draft' ? 'bg-[#FFC22E]' : on ? 'bg-white/20' : 'bg-[#EEF2F6]'
-                    }`}
-                  >
-                    <AppText
-                      className={`text-[11px] font-vn-bold ${
-                        entry.id === 'draft'
-                          ? 'text-[#3D2A00]'
-                          : on
-                            ? 'text-white'
-                            : 'text-[#33414D]'
-                      }`}
-                    >
-                      {n}
-                    </AppText>
-                  </View>
-                ) : null}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
-        {isPending && session ? <ListingRowsSkeleton /> : null}
-
-        {first && rows.length === 0 ? (
-          <View className="items-center gap-2.5 px-8 pt-12">
-            <CatIcon kind="sale" size={96} />
-            <AppText className="mt-2 text-center text-[17px] font-vn-bold">
-              {keyword ? 'Không có tin nào khớp' : empty.title}
-            </AppText>
-            <AppText className="text-center text-[14px] leading-[21.7px] text-[#5A6772]">
-              {keyword ? 'Thử tên khác hoặc đổi sang mục khác.' : empty.text}
-            </AppText>
-          </View>
-        ) : null}
+          Tin đăng
+        </AppText>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Tìm trong tin đăng"
+          accessibilityState={{ selected: searching }}
+          onPress={() => {
+            setSearching((on) => !on);
+            if (searching) setText('');
+          }}
+          className="h-11 w-11 items-center justify-center rounded-full"
+        >
+          <Svg
+            width={21}
+            height={21}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0F2440"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
+            <Circle cx={11} cy={11} r={7} />
+            <Path d="M20 20l-4-4" />
+          </Svg>
+        </Pressable>
       </View>
+
+      {searching ? (
+        <View className="px-4 pb-2 pt-1">
+          <TextInput
+            autoFocus
+            accessibilityLabel="Tìm trong tin đăng"
+            value={text}
+            onChangeText={setText}
+            placeholder="Tìm tên món…"
+            placeholderTextColor="#8896A3"
+            returnKeyType="search"
+            className="h-11 rounded-[14px] border-[1.5px] border-[#D5DDE5] bg-white px-3.5 font-vn text-[15px] text-[#0F2440]"
+          />
+        </View>
+      ) : null}
+
+      <ScrollView
+        horizontal
+        accessibilityRole="tablist"
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-2 px-4 py-2.5"
+        className="border-b border-[#F2F5F8]"
+      >
+        {SEGMENTS.map((entry) => {
+          const on = entry.id === segment;
+          const n = first?.counts[entry.id] ?? 0;
+          return (
+            <FilterChip
+              key={entry.id}
+              label={entry.label}
+              on={on}
+              onPress={() => setSegment(entry.id)}
+              count={n > 0 ? n : undefined}
+              badge={entry.id === 'draft' ? 'gold' : 'default'}
+            />
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+
+  const listHeader = (
+    <View className="bg-white">
+      {error && !data ? <ErrorBox message={error.message} onRetry={() => refetch()} /> : null}
+      {isPending && session ? <ListingRowsSkeleton /> : null}
+
+      {first && rows.length === 0 ? (
+        <View className="items-center gap-2.5 px-8 pt-12">
+          <CatIcon kind="sale" size={96} />
+          <AppText className="mt-2 text-center text-[17px] font-vn-bold">
+            {keyword ? 'Không có tin nào khớp' : empty.title}
+          </AppText>
+          <AppText className="text-center text-[14px] leading-[21.7px] text-[#5A6772]">
+            {keyword ? 'Thử tên khác hoặc đổi sang mục khác.' : empty.text}
+          </AppText>
+        </View>
+      ) : null}
     </View>
   );
 
   return (
-    <View className="flex-1 bg-[#E6F1FF]">
+    <View className="flex-1 bg-white">
+      {stickyHeader}
       <FlatList
         data={rows}
         keyExtractor={(row) => row.id}
@@ -245,7 +224,7 @@ export default function ListingsTab() {
             </View>
           );
         }}
-        ListHeaderComponent={header}
+        ListHeaderComponent={listHeader}
         ListFooterComponent={
           <View className="min-h-24 flex-1 items-center bg-white pt-4">
             {isFetchingNextPage ? (

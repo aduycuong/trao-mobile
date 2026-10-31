@@ -57,87 +57,92 @@ export function ChatMessageActions({
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable
-        accessibilityLabel="Đóng"
-        onPress={onClose}
+      <View
+        pointerEvents="none"
         className="absolute inset-0"
         style={{ backgroundColor: 'rgba(247,249,251,0.82)' }}
       />
-      <ScrollView
-        pointerEvents="box-none"
-        contentContainerStyle={{
-          paddingTop: top,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 12,
-          alignItems: mine ? 'flex-end' : 'flex-start',
-        }}
-      >
-        <View
-          onLayout={(event) => setGroupHeight(event.nativeEvent.layout.height)}
-          style={{ alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '100%' }}
+      {/* The scroll view covers the screen and takes every touch, so the tap-to-close has to live
+          inside it: the content fills the screen and closes on any tap that no button takes. */}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Pressable
+          accessibilityLabel="Đóng"
+          onPress={onClose}
+          style={{
+            flexGrow: 1,
+            paddingTop: top,
+            paddingBottom: insets.bottom + 8,
+            paddingHorizontal: 12,
+            alignItems: mine ? 'flex-end' : 'flex-start',
+          }}
         >
           <View
-            accessibilityRole="toolbar"
-            accessibilityLabel="Thả cảm xúc"
-            className="flex-row gap-0.5 rounded-full bg-white px-2 py-[5px]"
-            style={{
-              marginBottom: GAP,
-              elevation: 8,
-              shadowColor: '#0F2440',
-              shadowOpacity: 0.22,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 8 },
-            }}
+            onLayout={(event) => setGroupHeight(event.nativeEvent.layout.height)}
+            style={{ alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '100%' }}
           >
-            {CHAT_REACTIONS.map((reaction) => (
-              <Pressable
-                key={reaction.emoji}
-                accessibilityRole="button"
-                accessibilityLabel={`Thả ${reaction.label}`}
-                accessibilityState={{ selected: item.myReaction === reaction.emoji }}
-                onPress={() => onReact(reaction.emoji)}
-                className={`h-10 w-10 items-center justify-center rounded-full ${
-                  item.myReaction === reaction.emoji ? 'bg-[#E6F1FF]' : ''
-                }`}
-              >
-                <AppText className="text-[24px]">{reaction.emoji}</AppText>
-              </Pressable>
-            ))}
-          </View>
-
-          <View className="max-w-[76%]" style={{ minWidth: 0 }}>
-            <ChatBubbleBody item={item} />
-          </View>
-
-          <View
-            className="overflow-hidden rounded-[14px] bg-white"
-            style={{
-              width: 196,
-              marginTop: GAP,
-              elevation: 8,
-              shadowColor: '#0F2440',
-              shadowOpacity: 0.22,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 8 },
-            }}
-          >
-            {menu.map((entry, at) => (
-              <Pressable
-                key={entry.action}
-                accessibilityRole="button"
-                onPress={() => onAction(entry.action)}
-                className={`justify-center px-3.5 active:bg-[#F7F9FB] ${at > 0 ? 'border-t border-[#EEF2F6]' : ''}`}
-                style={{ height: MENU_ROW }}
-              >
-                <AppText
-                  className={`text-[14.5px] ${entry.danger ? 'text-[#B42318]' : 'text-[#0F2440]'}`}
+            <View
+              accessibilityRole="toolbar"
+              accessibilityLabel="Thả cảm xúc"
+              className="flex-row gap-0.5 rounded-full bg-white px-2 py-[5px]"
+              style={{
+                marginBottom: GAP,
+                elevation: 8,
+                shadowColor: '#0F2440',
+                shadowOpacity: 0.22,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+              }}
+            >
+              {CHAT_REACTIONS.map((reaction) => (
+                <Pressable
+                  key={reaction.emoji}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Thả ${reaction.label}`}
+                  accessibilityState={{ selected: item.myReaction === reaction.emoji }}
+                  onPress={() => onReact(reaction.emoji)}
+                  className={`h-10 w-10 items-center justify-center rounded-full ${
+                    item.myReaction === reaction.emoji ? 'bg-[#E6F1FF]' : ''
+                  }`}
                 >
-                  {entry.label}
-                </AppText>
-              </Pressable>
-            ))}
+                  <AppText className="text-[24px]">{reaction.emoji}</AppText>
+                </Pressable>
+              ))}
+            </View>
+
+            <View className="max-w-[76%]" style={{ minWidth: 0 }}>
+              <ChatBubbleBody item={item} />
+            </View>
+
+            <View
+              className="overflow-hidden rounded-[14px] bg-white"
+              style={{
+                width: 196,
+                marginTop: GAP,
+                elevation: 8,
+                shadowColor: '#0F2440',
+                shadowOpacity: 0.22,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+              }}
+            >
+              {menu.map((entry, at) => (
+                <Pressable
+                  key={entry.action}
+                  accessibilityRole="button"
+                  onPress={() => onAction(entry.action)}
+                  className={`justify-center px-3.5 active:bg-[#F7F9FB] ${at > 0 ? 'border-t border-[#EEF2F6]' : ''}`}
+                  style={{ height: MENU_ROW }}
+                >
+                  <AppText
+                    className={`text-[14.5px] ${entry.danger ? 'text-[#B42318]' : 'text-[#0F2440]'}`}
+                  >
+                    {entry.label}
+                  </AppText>
+                </Pressable>
+              ))}
+            </View>
           </View>
-        </View>
+        </Pressable>
       </ScrollView>
     </Modal>
   );

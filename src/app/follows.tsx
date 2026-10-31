@@ -19,6 +19,7 @@ import { fetchFollowPeople, MY_FOLLOWS_QUERY_KEY } from '@/services/profile/peop
 import { fetchMyProfile, MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { FollowTab, ListFollowPeopleResult } from '@/types/people';
 import { PeopleRowsSkeleton } from '@/components/ui/skeletons';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -86,7 +87,7 @@ export default function FollowsScreen() {
 
   const header = (
     <View>
-      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 pb-2.5 pt-1">
+      <View accessibilityRole="tablist" className="flex-row gap-2 px-4 pb-2.5 pt-3">
         {(
           [
             ['followers', 'Followers', counts.followers],
@@ -95,31 +96,13 @@ export default function FollowsScreen() {
         ).map(([value, label, count]) => {
           const on = tab === value;
           return (
-            <Pressable
+            <FilterChip
               key={value}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
+              label={label}
+              on={on}
               onPress={() => setTab(value)}
-              className={`h-[34px] flex-row items-center gap-1.5 rounded-full border-[1.5px] px-3.5 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText className={`text-[13.5px] font-vn-semibold ${on ? 'text-white' : ''}`}>
-                {label}
-              </AppText>
-              <View
-                className={`h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] ${
-                  on ? '' : 'bg-[#EEF2F6]'
-                }`}
-                style={on ? { backgroundColor: 'rgba(255,255,255,0.2)' } : undefined}
-              >
-                <AppText
-                  className={`text-[11px] font-vn-bold ${on ? 'text-white' : 'text-[#33414D]'}`}
-                >
-                  {count}
-                </AppText>
-              </View>
-            </Pressable>
+              count={count}
+            />
           );
         })}
       </View>
