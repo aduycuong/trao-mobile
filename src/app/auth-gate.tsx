@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,8 +26,6 @@ export default function AuthGateScreen() {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
-      {/* The gate is always white, so the phone's status bar text stays dark. */}
-      <StatusBar style="dark" />
       <View className="h-14 flex-row items-center px-2">
         <Pressable
           accessibilityRole="button"

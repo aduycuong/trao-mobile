@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, View } from 'react-native';
+import { Alert, Pressable, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -43,6 +43,9 @@ import type { ListingPageAuction, ListingPageData } from '@/types/listings';
 import type { ListingType } from '@/types/people';
 import { formatClock, formatCountdown, formatDayMonth, formatVnd } from '@/utils/format';
 import { ListingBodySkeleton } from '@/components/ui/skeletons';
+import { StatusBar } from 'expo-status-bar';
+import Animated from 'react-native-reanimated';
+import { StickyDetailHeader, useStickyScroll } from '@/components/navigation/sticky-detail-header';
 
 type AvailablePage = Extract<ListingPageData, { available: true }>;
 
@@ -115,6 +118,7 @@ export default function ListingPageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { scrollY, onScroll, solid } = useStickyScroll(400);
   const queryClient = useQueryClient();
   const goBack = useGoBack('/');
   const { session, getIdToken } = useAuth();
@@ -340,39 +344,16 @@ export default function ListingPageScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView
+      {/* Light text over the picture, dark once the bar is white. */}
+      <StatusBar style={solid ? 'dark' : 'light'} />
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
-        <MediaGallery
-          photos={page.photos}
-          videos={page.videos}
-          height={400}
-          overlay={
-            <>
-              <View style={{ marginTop: insets.top }}>
-                <RoundOverlayButton label="Quay lại" onPress={goBack}>
-                  <PathIcon d={ICON_CHEVRON_LEFT} size={20} strokeWidth={2.2} />
-                </RoundOverlayButton>
-              </View>
-              <View className="flex-row gap-2" style={{ marginTop: insets.top }}>
-                <RoundOverlayButton label="Chia sẻ" onPress={() => void share(page.title)}>
-                  <PathIcon d={ICON_SHARE} size={19} />
-                </RoundOverlayButton>
-                {page.isOwner && tools ? (
-                  <RoundOverlayButton label="Tuỳ chọn tin" onPress={() => setMenu(true)}>
-                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="#0F2440">
-                      <Circle cx={5} cy={12} r={2} />
-                      <Circle cx={12} cy={12} r={2} />
-                      <Circle cx={19} cy={12} r={2} />
-                    </Svg>
-                  </RoundOverlayButton>
-                ) : null}
-              </View>
-            </>
-          }
-        />
+        <MediaGallery photos={page.photos} videos={page.videos} height={400} />
 
         <View className="gap-3.5 px-4 pt-4">
           <View className="flex-row flex-wrap items-center gap-1.5">
@@ -818,7 +799,34 @@ export default function ListingPageScreen() {
           ) : null}
         </View>
         <View style={{ height: insets.bottom + 8 }} />
-      </ScrollView>
+      </Animated.ScrollView>
+
+      <StickyDetailHeader
+        scrollY={scrollY}
+        heroHeight={400}
+        title={page.title}
+        left={
+          <RoundOverlayButton label="Quay lại" onPress={goBack}>
+            <PathIcon d={ICON_CHEVRON_LEFT} size={20} strokeWidth={2.2} />
+          </RoundOverlayButton>
+        }
+        right={
+          <View className="flex-row gap-2">
+            <RoundOverlayButton label="Chia sẻ" onPress={() => void share(page.title)}>
+              <PathIcon d={ICON_SHARE} size={19} />
+            </RoundOverlayButton>
+            {page.isOwner && tools ? (
+              <RoundOverlayButton label="Tuỳ chọn tin" onPress={() => setMenu(true)}>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="#0F2440">
+                  <Circle cx={5} cy={12} r={2} />
+                  <Circle cx={12} cy={12} r={2} />
+                  <Circle cx={19} cy={12} r={2} />
+                </Svg>
+              </RoundOverlayButton>
+            ) : null}
+          </View>
+        }
+      />
 
       {menu && tools ? (
         <OwnerMenuSheet
