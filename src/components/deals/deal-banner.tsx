@@ -29,6 +29,9 @@ const OFFER_MODE: Partial<Record<DealBannerActionKey, OfferMode>> = {
 
 type Screen = 'chat' | 'item';
 
+/** Space between two banners while they slide, so they never touch. */
+const PAGE_GAP = 12;
+
 /**
  * The deals of a chat (or of the viewer on a listing page) as banners (canvas DealBanner), newest
  * activity first, the one about `firstListingId` (the listing the chat was opened from) before
@@ -62,15 +65,21 @@ export function DealBanners({
       {width > 0 ? (
         <ScrollView
           horizontal
-          pagingEnabled
+          // One banner per swipe, with a gap between them (paging would glue the pages together).
+          snapToInterval={width + PAGE_GAP}
+          snapToAlignment="start"
+          decelerationRate="fast"
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(event) =>
-            setIndex(Math.round(event.nativeEvent.contentOffset.x / width))
+            setIndex(Math.round(event.nativeEvent.contentOffset.x / (width + PAGE_GAP)))
           }
           style={{ overflow: 'visible' }}
         >
-          {sorted.map((deal) => (
-            <View key={deal.id} style={{ width }}>
+          {sorted.map((deal, at) => (
+            <View
+              key={deal.id}
+              style={{ width, marginRight: at < sorted.length - 1 ? PAGE_GAP : 0 }}
+            >
               <DealBanner
                 deal={deal}
                 screen={screen}
