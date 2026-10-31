@@ -67,7 +67,7 @@ export function ReputationCard({ profile }: { profile: MyProfile }) {
 
   return (
     <View className="mx-4 mt-4 gap-3.5 rounded-[20px] bg-[#F1F7FE] p-4">
-      <View className="gap-0.5">
+      <View className="gap-1.5">
         <AppText accessibilityRole="header" className="text-[13px] font-vn-semibold text-[#5A6772]">
           Uy tín
         </AppText>
