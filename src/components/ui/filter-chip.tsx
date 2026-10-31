@@ -8,8 +8,9 @@ type FilterChipProps = {
   onPress: () => void;
   /** Shown in a small badge after the label; leave it out to hide the badge. */
   count?: number;
-  /** `gold` is for counts that ask for attention (drafts, deals in progress). */
-  badge?: 'default' | 'gold';
+  /** `gold` is for counts that ask for attention (drafts, deals in progress); `alert` is the
+   * coral badge of unread counts. */
+  badge?: 'default' | 'gold' | 'alert';
   /** Colour dot before the label (the tag colour in the Kho đồ). */
   dot?: string;
 };
@@ -23,8 +24,22 @@ const COUNT = { lineHeight: 14, includeFontPadding: false, textAlignVertical: 'c
  * ink fill when on, a count badge. One component so the chips look the same everywhere.
  */
 export function FilterChip({ label, on, onPress, count, badge = 'default', dot }: FilterChipProps) {
-  const badgeSkin = badge === 'gold' ? 'bg-[#FFC22E]' : on ? 'bg-white/20' : 'bg-[#EEF2F6]';
-  const badgeText = badge === 'gold' ? 'text-[#3D2A00]' : on ? 'text-white' : 'text-[#33414D]';
+  const badgeSkin =
+    badge === 'gold'
+      ? 'bg-[#FFC22E]'
+      : badge === 'alert'
+        ? 'bg-[#F0533A]'
+        : on
+          ? 'bg-white/20'
+          : 'bg-[#EEF2F6]';
+  const badgeText =
+    badge === 'gold'
+      ? 'text-[#3D2A00]'
+      : badge === 'alert'
+        ? 'text-white'
+        : on
+          ? 'text-white'
+          : 'text-[#33414D]';
 
   return (
     <Pressable

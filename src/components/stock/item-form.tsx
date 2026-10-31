@@ -56,6 +56,7 @@ import { formatClipDuration } from '@/utils/format';
 import { planPicks } from '@/utils/media-rules';
 import { sameMedia, tilesOf, type Tile } from '@/utils/item-form';
 import { StackSkeleton } from '@/components/ui/skeletons';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 const PLACEHOLDER =
   'Ví dụ: iPhone 13 128GB xanh, mua 2022, pin 89%, xước nhẹ cạnh dưới, kèm ốp và cáp. Mua dịp tốt nghiệp, giờ đổi máy nên bán lại.';
@@ -150,6 +151,7 @@ function ItemFormBody({
   const router = useRouter();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { session, getIdToken } = useAuth();
 
   const initial = item ? tilesOf(item) : { photos: [], videos: [] };
@@ -236,7 +238,9 @@ function ItemFormBody({
         queryClient.invalidateQueries({ queryKey: ['item', result.id] }),
       ]);
       if (item) {
-        router.replace({ pathname: '/stock/[id]', params: { id: item.id } });
+        // Back to where the edit was opened from (the item page, or the post flow), not a new
+        // item page on top of it; the item page is the fallback when the edit was opened first.
+        onClose();
       } else if (postFlow && after === 'post') {
         router.replace({ pathname: '/stock/[id]/post', params: { id: result.id, from: 'new' } });
       } else if (postFlow) {
@@ -801,13 +805,13 @@ function ItemFormBody({
 
       <View
         className="flex-row gap-2 border-t border-[#E8ECF0] bg-white px-4 pt-2.5"
-        style={{ paddingBottom: 18 + insets.bottom }}
+        style={{ paddingBottom: 18 + bottomInset }}
       >
         {postFlow ? (
           <BarButton
             label="Chỉ lưu vào Kho"
             tone="outline"
-            disabled={!canSave}
+            disabled={!canSave || save.isPending}
             loading={save.isPending && save.variables === 'stock'}
             onPress={() => submitForm('stock')}
           />
@@ -815,8 +819,10 @@ function ItemFormBody({
         <BarButton
           label={item ? 'Lưu thay đổi' : postFlow ? 'Tiếp: Đăng tin' : 'Thêm vào Kho đồ'}
           flex={1.3}
-          disabled={!canSave}
-          loading={save.isPending && save.variables !== 'stock'}
+          disabled={!canSave || save.isPending}
+          // Without the second button (editing, or adding outside the post flow) every save is
+          // `'stock'`, so this button shows the progress then too.
+          loading={save.isPending && (!postFlow || save.variables !== 'stock')}
           onPress={() => submitForm(postFlow ? 'post' : 'stock')}
         />
       </View>

@@ -38,7 +38,7 @@ export default function UserListingsScreen() {
         </AppText>
         <AppText className="text-[13px] text-[#5A6772]">{profile.listingCounts.all}</AppText>
       </View>
-      <TypeChips counts={profile.listingCounts} value={type} onChange={setType} variant="badge" />
+      <TypeChips counts={profile.listingCounts} value={type} onChange={setType} />
     </View>
   ) : null;
 

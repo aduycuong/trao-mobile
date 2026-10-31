@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabIcon, type TabIconKind } from '@/components/icons/tab-icon';
 import { AppText } from '@/components/ui/app-text';
+import { snugBottomInset } from '@/hooks/useBottomInset';
 import { useAuth } from '@/hooks/useAuth';
 import { useChat } from '@/hooks/useChat';
 import { apiRequest } from '@/services/api';
@@ -38,12 +39,14 @@ export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
     listings: summary.data?.newOffers ?? 0,
   };
   const activeName = state.routes[state.index]?.name;
+  // The labels sit close to the bottom edge (see `snugBottomInset`).
+  const paddingBottom = snugBottomInset(insets.bottom);
 
   return (
     <View
       accessibilityRole="tablist"
       className="flex-row border-t border-[#E8ECF0] bg-white px-1 pt-1.5"
-      style={{ paddingBottom: 12 + insets.bottom }}
+      style={{ paddingBottom }}
     >
       {TABS.map((tab) => {
         const active = tab.name === activeName;

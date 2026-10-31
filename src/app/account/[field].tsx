@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthButton, AuthError, AuthField } from '@/components/auth/auth-ui';
 import { ScreenBar } from '@/components/navigation/screen-bar';
 import { AppText } from '@/components/ui/app-text';
@@ -16,6 +15,7 @@ import { MY_PROFILE_QUERY_KEY } from '@/services/profile/profile-api';
 import type { MyAccount } from '@/types/account';
 import { BIO_MAX_LENGTH, validateTextField, type TextField } from '@/utils/account-validation';
 import { FieldSkeleton } from '@/components/ui/skeletons';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 const FIELDS: Record<
   TextField,
@@ -64,7 +64,7 @@ export default function AccountTextEditScreen() {
 function TextEdit({ field }: { field: TextField }) {
   const config = FIELDS[field];
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const queryClient = useQueryClient();
   const { session, getIdToken, refreshProfile } = useAuth();
   // What the user typed; null until they type, so the field shows the saved value before that.
@@ -176,7 +176,7 @@ function TextEdit({ field }: { field: TextField }) {
           </View>
           <View
             className="border-t border-[#EEF2F6] px-5 pt-3"
-            style={{ paddingBottom: 20 + insets.bottom }}
+            style={{ paddingBottom: 20 + bottomInset }}
           >
             <AuthButton label="Lưu" onPress={save} loading={saving} disabled={!dirty} />
           </View>

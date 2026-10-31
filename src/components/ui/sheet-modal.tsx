@@ -21,8 +21,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
+import { snugBottomInset, useBottomInset } from '@/hooks/useBottomInset';
 
 /** Dragged further than this (points) or flicked faster than this (points/s): the sheet closes. */
 const CLOSE_DISTANCE = 110;
@@ -37,7 +37,7 @@ type SheetModalProps = {
   children: React.ReactNode;
   /** Classes of the header and the content; the sheet has no side padding of its own. */
   contentClassName?: string;
-  /** Extra space under the content, on top of the safe area. */
+  /** Extra space under the content, on top of the bottom safe area (`snugBottomInset`). */
   bottomPadding?: number;
   /** The sheet is never taller than this share of the screen. */
   maxHeightRatio?: number;
@@ -53,10 +53,10 @@ export function SheetModal({
   header,
   children,
   contentClassName = 'px-5',
-  bottomPadding = 22,
+  bottomPadding = 0,
   maxHeightRatio = 0.88,
 }: SheetModalProps) {
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const { height: screenHeight } = useWindowDimensions();
   const translateY = useSharedValue(screenHeight);
   const sheetHeight = useSharedValue(screenHeight);
@@ -142,7 +142,7 @@ export function SheetModal({
               </GestureDetector>
               <View
                 className={`shrink ${contentClassName}`}
-                style={{ paddingBottom: bottomPadding + insets.bottom }}
+                style={{ paddingBottom: bottomPadding + snugBottomInset(bottomInset) }}
               >
                 {children}
               </View>

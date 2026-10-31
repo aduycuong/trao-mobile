@@ -38,7 +38,6 @@ export function ConfirmSheet({
   return (
     <SheetModal
       onClose={onCancel}
-      bottomPadding={24}
       header={<AppText className="pb-3.5 text-[19px] font-vn-bold">{title}</AppText>}
     >
       <View className="gap-3.5">

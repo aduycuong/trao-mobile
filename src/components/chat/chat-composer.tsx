@@ -11,7 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { ChatSticker } from '@/components/chat/chat-sticker';
 import { AppText } from '@/components/ui/app-text';
@@ -21,6 +20,7 @@ import { getReplyPreviewText } from '@/services/chat/chat-view';
 import { CHAT_MEDIA_MAX_FILES, CHAT_TEXT_MAX_LENGTH } from '@/services/chat/constants';
 import { CHAT_STICKERS } from '@/services/chat/stickers';
 import type { ChatReplyTo, LocalMediaItem } from '@/types/chat';
+import { useBottomInset } from '@/hooks/useBottomInset';
 
 const EMOJIS = [
   '😀',
@@ -142,7 +142,7 @@ export function ChatComposer({
   notifyTyping,
   stopTyping,
 }: ChatComposerProps) {
-  const insets = useSafeAreaInsets();
+  const bottomInset = useBottomInset();
   const draft = useChatDraft(inboxId);
   const [panel, setPanel] = useState<Panel>(null);
   const [emojiTab, setEmojiTab] = useState<'emoji' | 'sticker'>('emoji');
@@ -480,7 +480,7 @@ export function ChatComposer({
           )}
         </View>
       ) : null}
-      <View style={{ height: insets.bottom }} />
+      <View style={{ height: bottomInset }} />
     </View>
   );
 }

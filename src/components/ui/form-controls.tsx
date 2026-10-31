@@ -89,7 +89,9 @@ export function BarButton({
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled || !!loading, busy: !!loading }}
       onPress={disabled || loading ? undefined : onPress}
-      style={{ flex }}
+      // In a row `flex` shares the width; in a column (a bottom bar with one button) a flex basis of
+      // 0 would squeeze the button to nothing, so it can never get shorter than its 50.
+      style={{ flex, minHeight: 50 }}
       className={`h-[50px] flex-row items-center justify-center gap-2 rounded-[14px] ${skin} ${
         loading ? 'opacity-70' : ''
       }`}

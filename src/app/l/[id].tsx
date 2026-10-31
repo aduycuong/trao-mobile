@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useIsFocused } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,12 +20,7 @@ import { MediaGallery, RoundOverlayButton } from '@/components/stock/media-galle
 import { AppText } from '@/components/ui/app-text';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { ErrorBox } from '@/components/ui/form-controls';
-import {
-  ICON_CHEVRON_LEFT,
-  ICON_CHEVRON_RIGHT,
-  ICON_PENCIL,
-  PathIcon,
-} from '@/components/ui/path-icon';
+import { ICON_CHEVRON_LEFT, ICON_CHEVRON_RIGHT, PathIcon } from '@/components/ui/path-icon';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoBack } from '@/hooks/useGoBack';
 import { useOpenChat } from '@/hooks/useOpenChat';
@@ -118,6 +113,7 @@ export default function ListingPageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const focused = useIsFocused();
   const { scrollY, onScroll, solid } = useStickyScroll(400);
   const queryClient = useQueryClient();
   const goBack = useGoBack('/');
@@ -344,8 +340,9 @@ export default function ListingPageScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Light text over the picture, dark once the bar is white. */}
-      <StatusBar style={solid ? 'dark' : 'light'} />
+      {/* Light text over the picture, dark once the bar is white. Only while this screen is the
+          one on show: a screen pushed over it (the edit forms) would otherwise inherit it. */}
+      {focused ? <StatusBar style={solid ? 'dark' : 'light'} /> : null}
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -567,32 +564,6 @@ export default function ListingPageScreen() {
                 )
               ) : null}
             </View>
-          </View>
-        ) : tools ? (
-          <View className="px-4 pt-4">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ disabled: !tools.canEdit }}
-              disabled={!tools.canEdit}
-              onPress={() =>
-                router.push({ pathname: '/listings/[id]/edit', params: { id: tools.id } })
-              }
-              className={`h-[50px] flex-row items-center justify-center gap-2 rounded-[14px] ${
-                tools.canEdit ? 'bg-[#1673D9]' : 'bg-[#E1E7EE]'
-              }`}
-            >
-              <PathIcon d={ICON_PENCIL} size={18} color={tools.canEdit ? '#FFFFFF' : '#8A96A3'} />
-              <AppText
-                className={`text-[15px] font-vn-bold ${tools.canEdit ? 'text-white' : 'text-[#8A96A3]'}`}
-              >
-                Sửa tin
-              </AppText>
-            </Pressable>
-            {!tools.canEdit && tools.editBlockedReason ? (
-              <AppText className="mt-1.5 text-center text-[12.5px] text-[#5A6772]">
-                {tools.editBlockedReason}
-              </AppText>
-            ) : null}
           </View>
         ) : null}
 
