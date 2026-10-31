@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabIcon, type TabIconKind } from '@/components/icons/tab-icon';
 import { AppText } from '@/components/ui/app-text';
+import { snugBottomInset } from '@/hooks/useBottomInset';
 import { useAuth } from '@/hooks/useAuth';
 import { useChat } from '@/hooks/useChat';
 import { apiRequest } from '@/services/api';
@@ -38,10 +39,8 @@ export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
     listings: summary.data?.newOffers ?? 0,
   };
   const activeName = state.routes[state.index]?.name;
-  // The labels sit close to the bottom edge: the home indicator (about 34 high on an iPhone, a thin
-  // bar near the very bottom) only needs the lower part of the safe area, so 12 of it is given
-  // back, but never less than 10 above the edge.
-  const paddingBottom = Math.max(insets.bottom - 12, 10);
+  // The labels sit close to the bottom edge (see `snugBottomInset`).
+  const paddingBottom = snugBottomInset(insets.bottom);
 
   return (
     <View
