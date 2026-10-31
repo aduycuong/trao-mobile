@@ -172,6 +172,8 @@ type PostListingFlowProps = {
   prefill?: ListingFormFields;
   /** Screen title: "Đăng tin" (default), "Sửa tin", "Đăng lại". */
   title?: string;
+  /** Open on the "sent" screen with this outcome (the item of the listing was edited and saved). */
+  sent?: 'pending_review' | 'published' | 'scheduled';
 };
 
 /** Đăng tin steps 2 and 3 plus the "sent" screen (canvas Post: listing, check, done). */
@@ -182,6 +184,7 @@ export function PostListingFlow({
   listingId,
   prefill,
   title = 'Đăng tin',
+  sent,
 }: PostListingFlowProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -190,7 +193,7 @@ export function PostListingFlow({
   const { session, getIdToken } = useAuth();
   const goBack = useGoBack({ pathname: '/stock/[id]', params: { id: itemId } });
 
-  const [step, setStep] = useState<Step>('listing');
+  const [step, setStep] = useState<Step>(sent ? 'done' : 'listing');
   const [chosenType, setType] = useState<ListingType>(initialType ?? 'sell');
   /** The area picked for this listing; absent, the listing keeps its own (edit) or takes the owner's (new). */
   const [areaPick, setAreaPick] = useState<{ location: OnboardingLocation; name: string } | null>(
@@ -218,7 +221,7 @@ export function PostListingFlow({
   );
   const [note, setNote] = useState(prefill?.handoverNote ?? '');
   const [outcome, setOutcome] = useState<'pending_review' | 'published' | 'scheduled'>(
-    'pending_review'
+    sent ?? 'pending_review'
   );
   const [confirmed, setConfirmed] = useState<[boolean, boolean]>([false, false]);
   const [levelsOpen, setLevelsOpen] = useState(false);
@@ -583,8 +586,12 @@ export function PostListingFlow({
             onPress={() =>
               router.push({
                 pathname: '/stock/[id]/edit',
-                // Editing a listing only to change the item: after saving it, land on Tin đăng.
-                params: { id: item.id, ...(from === 'edit' ? { after: 'listings' } : {}) },
+                // Editing a listing only to change the item: saving it ends on this listing's
+                // "Đã gửi bản sửa" screen.
+                params: {
+                  id: item.id,
+                  ...(from === 'edit' && listingId ? { after: 'listing', listing: listingId } : {}),
+                },
               })
             }
             className="h-[34px] justify-center rounded-[10px] bg-white px-3"

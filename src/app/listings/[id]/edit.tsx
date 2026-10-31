@@ -12,12 +12,17 @@ import { fetchMyListing, listingQueryKey } from '@/services/listings/listings-ap
 import { RequireSession } from '@/components/auth/require-session';
 import { StackSkeleton } from '@/components/ui/skeletons';
 
+/** What the "sent" screen says: a live or scheduled listing keeps showing while the edit waits. */
+function sentOutcome(status: string): 'pending_review' | 'published' | 'scheduled' {
+  return status === 'published' || status === 'scheduled' ? status : 'pending_review';
+}
+
 /**
  * Edit a listing, send a rejected one again, or post a closed one again: the Đăng tin steps with
  * the listing's own fields filled in. The server decides what needs a new review.
  */
 function EditListingContent() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, sent } = useLocalSearchParams<{ id: string; sent?: string }>();
   const insets = useSafeAreaInsets();
   const { session, getIdToken } = useAuth();
   const goBack = useGoBack({ pathname: '/listings/[id]', params: { id } });
@@ -74,6 +79,9 @@ function EditListingContent() {
 
   return (
     <PostListingFlow
+      // Remounts when the item was just edited, to open on the "sent" screen.
+      key={sent ? 'sent' : 'edit'}
+      sent={sent ? sentOutcome(listing.status) : undefined}
       itemId={listing.itemId}
       from="edit"
       initialType={listing.type}

@@ -71,8 +71,8 @@ type ItemFormProps = {
   itemId?: string;
   /** `post`: Thêm đồ as step 1 of Đăng tin. */
   flow?: 'post';
-  /** `listings`: after saving an edit, go to Tin đăng (opened from the edit of a listing). */
-  afterSave?: 'listings';
+  /** Opened from the edit of this listing: after saving a change of the item, show that listing's "sent" screen. */
+  afterSave?: { listingId: string };
 };
 
 /** Thêm đồ (/stock/new) and Chỉnh sửa (/stock/[id]/edit), canvas Post step "item". */
@@ -155,7 +155,7 @@ function ItemFormBody({
 }: {
   item: ItemDetail | null;
   postFlow: boolean;
-  afterSave?: 'listings';
+  afterSave?: { listingId: string };
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -242,19 +242,27 @@ function ItemFormBody({
       return updateMyItem(token, item.id, body);
     },
     onSuccess: async (result, after) => {
+      // Only a change of the content goes to review; tags alone do not.
+      const sentToReview = contentEdited();
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY }),
         // The listings of the item show its title and cover, and may go back for review.
         queryClient.invalidateQueries({ queryKey: MY_LISTINGS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ['listing'] }),
         queryClient.invalidateQueries({ queryKey: ['item', result.id] }),
       ]);
       if (item) {
         // Back to where the edit was opened from (the item page, or the post flow), not a new
         // item page on top of it; the item page is the fallback when the edit was opened first.
-        // From the edit of a listing the person only wanted the item changed: go to Tin đăng.
-        if (afterSave === 'listings') router.dismissTo('/listings');
-        else onClose();
+        // From the edit of a listing the person only wanted the item changed: show that listing's
+        // "Đã gửi bản sửa" screen, as if the listing itself had been edited.
+        if (afterSave && sentToReview) {
+          router.dismissTo({
+            pathname: '/listings/[id]/edit',
+            params: { id: afterSave.listingId, sent: '1' },
+          });
+        } else onClose();
       } else if (postFlow && after === 'post') {
         router.replace({ pathname: '/stock/[id]/post', params: { id: result.id, from: 'new' } });
       } else if (postFlow) {
