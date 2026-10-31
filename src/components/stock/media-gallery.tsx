@@ -32,7 +32,7 @@ type MediaGalleryProps = {
   /** Shown when there is nothing to show: the category icon. */
   fallbackIcon?: CatIconKind;
   /** Rounded buttons drawn over the top of the first photo (back, share, more). */
-  overlay: React.ReactNode;
+  overlay?: React.ReactNode;
   /** A row of small previews under the picture (canvas StockItem); the listing page has none. */
   thumbs?: boolean;
 };
@@ -123,12 +123,14 @@ export function MediaGallery({
           </View>
         )}
 
-        <View
-          className="absolute left-3 right-3 top-3 flex-row justify-between"
-          pointerEvents="box-none"
-        >
-          {overlay}
-        </View>
+        {overlay ? (
+          <View
+            className="absolute left-3 right-3 top-3 flex-row justify-between"
+            pointerEvents="box-none"
+          >
+            {overlay}
+          </View>
+        ) : null}
         {slide?.caption ? (
           <View
             pointerEvents="none"

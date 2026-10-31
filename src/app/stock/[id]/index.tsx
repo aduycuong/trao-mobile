@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { CATEGORY_ICON_BY_SLUG, CatIcon, type CatIconKind } from '@/components/icons/cat-icon';
@@ -46,6 +46,8 @@ import {
 import { formatDayMonth, formatEventTime } from '@/utils/format';
 import { RequireSession } from '@/components/auth/require-session';
 import { ItemBodySkeleton } from '@/components/ui/skeletons';
+import Animated from 'react-native-reanimated';
+import { StickyDetailHeader, useStickyScroll } from '@/components/navigation/sticky-detail-header';
 
 const STATUS_STYLE: Record<
   ItemStatus | 'live',
@@ -80,6 +82,7 @@ function StockItemContent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { scrollY, onScroll } = useStickyScroll();
   const queryClient = useQueryClient();
   const { session, getIdToken } = useAuth();
   const postGuard = usePenaltyGuard();
@@ -194,7 +197,12 @@ function StockItemContent() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      >
         <MediaGallery
           photos={item.photos}
           videos={item.videos}
@@ -202,24 +210,6 @@ function StockItemContent() {
           thumbs
           fallbackIcon={
             (item.categorySlug && CATEGORY_ICON_BY_SLUG[item.categorySlug]) || 'collect'
-          }
-          overlay={
-            <>
-              <View style={{ marginTop: insets.top }}>
-                <RoundOverlayButton label="Quay lại" onPress={goBack}>
-                  <PathIcon d={ICON_CHEVRON_LEFT} size={20} strokeWidth={2.2} />
-                </RoundOverlayButton>
-              </View>
-              <View style={{ marginTop: insets.top }}>
-                <RoundOverlayButton label="Tuỳ chọn món" onPress={() => setSheet('more')}>
-                  <Svg width={20} height={20} viewBox="0 0 24 24" fill="#0F2440">
-                    <Circle cx={5} cy={12} r={2} />
-                    <Circle cx={12} cy={12} r={2} />
-                    <Circle cx={19} cy={12} r={2} />
-                  </Svg>
-                </RoundOverlayButton>
-              </View>
-            </>
           }
         />
 
@@ -486,7 +476,27 @@ function StockItemContent() {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+
+      <StickyDetailHeader
+        scrollY={scrollY}
+        heroHeight={300}
+        title={item.title}
+        left={
+          <RoundOverlayButton label="Quay lại" onPress={goBack}>
+            <PathIcon d={ICON_CHEVRON_LEFT} size={20} strokeWidth={2.2} />
+          </RoundOverlayButton>
+        }
+        right={
+          <RoundOverlayButton label="Tuỳ chọn món" onPress={() => setSheet('more')}>
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="#0F2440">
+              <Circle cx={5} cy={12} r={2} />
+              <Circle cx={12} cy={12} r={2} />
+              <Circle cx={19} cy={12} r={2} />
+            </Svg>
+          </RoundOverlayButton>
+        }
+      />
 
       <View
         className="gap-1.5 border-t border-[#EEF2F6] bg-white px-4 pt-2.5"
