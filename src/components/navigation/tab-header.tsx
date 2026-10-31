@@ -63,11 +63,19 @@ export function TabHeader() {
           <Path d="M10 20.5a2 2 0 0 0 4 0" />
         </Svg>
         {unread > 0 ? (
+          // The web badge: the count (99+ at most) in a coral pill with a white ring.
           <View
             pointerEvents="none"
-            className="absolute rounded-full border-2 border-[#E6F1FF] bg-[#D9480F]"
-            style={{ top: 10, right: 11, width: 12, height: 12 }}
-          />
+            className="absolute items-center justify-center rounded-full border-2 border-white bg-[#F0533A] px-1"
+            style={{ top: 4, right: 2, height: 22, minWidth: 22 }}
+          >
+            <AppText
+              className="text-[10px] font-vn-bold text-white"
+              style={{ lineHeight: 12, includeFontPadding: false, textAlignVertical: 'center' }}
+            >
+              {unread > 99 ? '99+' : unread}
+            </AppText>
+          </View>
         ) : null}
       </Pressable>
     </View>
