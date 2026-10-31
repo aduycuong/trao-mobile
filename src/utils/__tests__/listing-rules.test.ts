@@ -5,6 +5,7 @@ import {
   composeStart,
   describeMain,
   digitsOnly,
+  editMoney,
   groupedDigits,
   isStartValid,
   startRange,
@@ -137,5 +138,29 @@ describe('auction start', () => {
     expect(start.getDate()).toBe(31);
     expect(start.getHours()).toBe(20);
     expect(start.getMinutes()).toBe(30);
+  });
+});
+
+describe('editMoney', () => {
+  it('keeps the caret by the typed digit when editing in the middle', () => {
+    // 7.500.000, a 3 typed after the 7 (caret was after "7"): "73.500.000".
+    expect(editMoney('7500000', '73.500.000')).toEqual({ digits: '73500000', caret: 2 });
+    // The same at the end.
+    expect(editMoney('7500000', '7.500.0003')).toEqual({ digits: '75000003', caret: 10 });
+  });
+
+  it('keeps the caret where a digit was deleted', () => {
+    // Backspace on the 5 of 7.500.000: "7.00.000" -> "700.000", the caret stays after the 7.
+    expect(editMoney('7500000', '7.00.000')).toEqual({ digits: '700000', caret: 1 });
+  });
+
+  it('removes the digit before a dot when the dot is deleted', () => {
+    // Backspace on the first dot of 7.500.000: "7500.000" -> the 7 goes.
+    expect(editMoney('7500000', '7500.000')).toEqual({ digits: '500000', caret: 0 });
+  });
+
+  it('puts the caret at the end for typing there and for an empty field', () => {
+    expect(editMoney('', '5')).toEqual({ digits: '5', caret: 1 });
+    expect(editMoney('12', '')).toEqual({ digits: '', caret: 0 });
   });
 });

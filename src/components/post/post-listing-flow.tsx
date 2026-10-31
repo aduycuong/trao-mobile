@@ -54,7 +54,7 @@ import {
   buildListingBody,
   canPostAlongside,
   describeMain,
-  digitsOnly,
+  editMoney,
   groupedDigits,
   isStartValid,
   type ListingDraft,
@@ -999,6 +999,8 @@ function MoneyField({
   large?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
+  // Set for one edit, to keep the caret where the person was typing; cleared by the next move.
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
   return (
     <View
       className={`flex-row items-center rounded-xl border-[1.5px] bg-white px-3 ${
@@ -1009,7 +1011,13 @@ function MoneyField({
         accessibilityLabel={label}
         keyboardType="number-pad"
         value={groupedDigits(value)}
-        onChangeText={(text) => onChange(digitsOnly(text))}
+        selection={selection}
+        onSelectionChange={() => setSelection(undefined)}
+        onChangeText={(text) => {
+          const edit = editMoney(value, text);
+          onChange(edit.digits);
+          setSelection({ start: edit.caret, end: edit.caret });
+        }}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="0"

@@ -34,6 +34,50 @@ export function groupedDigits(value: string): string {
   return value ? Number(value).toLocaleString('vi-VN') : '';
 }
 
+/**
+ * An edit of the price field, in the middle or at the end. `previous` is the digits before the
+ * edit, `typed` what the field shows after it (the dots of the old grouping still in, plus what was
+ * typed, pasted or deleted). Returns the digits now and where the caret goes in their grouped form,
+ * so it stays next to what the person was editing instead of jumping to the end.
+ */
+export function editMoney(previous: string, typed: string): { digits: string; caret: number } {
+  const before = groupedDigits(previous);
+  const limit = Math.min(before.length, typed.length);
+  let start = 0;
+  while (start < limit && before[start] === typed[start]) start += 1;
+  let tail = 0;
+  while (
+    tail < limit - start &&
+    before[before.length - 1 - tail] === typed[typed.length - 1 - tail]
+  ) {
+    tail += 1;
+  }
+
+  let digits = digitsOnly(typed);
+  // The digits right of the caret stay the same: they are the unchanged end of the text.
+  let right = digitsOnly(typed.slice(typed.length - tail)).length;
+
+  // Backspace over a dot removes no digit: take the digit before the dot, as if it was the one.
+  if (digits === previous && typed.length < before.length) {
+    const left = digitsOnly(before.slice(0, start)).length;
+    if (left > 0) {
+      digits = previous.slice(0, left - 1) + previous.slice(left);
+      right = digitsOnly(before.slice(start)).length;
+    }
+  }
+
+  const grouped = groupedDigits(digits);
+  let caret = grouped.length;
+  let remaining = right;
+  while (remaining > 0 && caret > 0) {
+    caret -= 1;
+    if (/\d/.test(grouped[caret]!)) remaining -= 1;
+  }
+  // Next to the digit, not on the far side of a dot: typing goes on right after it.
+  while (caret > 0 && !/\d/.test(grouped[caret - 1]!)) caret -= 1;
+  return { digits, caret };
+}
+
 export const toNumber = (value: string) => (value ? Number(value) : 0);
 
 /** The start of an auction may be this soon at the earliest, and this far at the latest. */
