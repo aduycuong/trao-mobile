@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   interpolate,
@@ -8,6 +8,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scheduleOnRN } from 'react-native-worklets';
 import { AppText } from '@/components/ui/app-text';
 
 /** Height of the bar under the status bar. */
@@ -15,13 +16,32 @@ const BAR_HEIGHT = 56;
 /** The background fades in over this much scrolling, ending when the bar reaches the picture's bottom. */
 const FADE_DISTANCE = 90;
 
-/** Scroll position of a detail screen, to hand to the header and to the `Animated.ScrollView`. */
-export function useStickyScroll() {
+/** Where the bar becomes solid: the picture's bottom edge, less the bar itself. */
+function solidAt(heroHeight: number, safeTop: number) {
+  return Math.max(heroHeight - (safeTop + BAR_HEIGHT), 1);
+}
+
+/**
+ * Scroll position of a detail screen, to hand to the header and to the `Animated.ScrollView`.
+ * `solid` turns true once the bar is more white than picture, which is when the status bar text
+ * should go from light (over the picture) to dark.
+ */
+export function useStickyScroll(heroHeight: number) {
+  const insets = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
+  const solidShared = useSharedValue(false);
+  const [solid, setSolid] = useState(false);
+  const switchAt = solidAt(heroHeight, insets.top) - FADE_DISTANCE / 2;
+
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollY.set(event.contentOffset.y);
+    const next = event.contentOffset.y >= switchAt;
+    if (next !== solidShared.get()) {
+      solidShared.set(next);
+      scheduleOnRN(setSolid, next);
+    }
   });
-  return { scrollY, onScroll };
+  return { scrollY, onScroll, solid };
 }
 
 type StickyDetailHeaderProps = {
@@ -49,7 +69,7 @@ export function StickyDetailHeader({
 }: StickyDetailHeaderProps) {
   const insets = useSafeAreaInsets();
   const barHeight = insets.top + BAR_HEIGHT;
-  const end = Math.max(heroHeight - barHeight, 1);
+  const end = solidAt(heroHeight, insets.top);
   const start = Math.max(end - FADE_DISTANCE, 0);
 
   const background = useAnimatedStyle(() => ({

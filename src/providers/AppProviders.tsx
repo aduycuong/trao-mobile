@@ -69,7 +69,7 @@ export function AppProviders({ children }: AppProvidersProps) {
             <SplashGate />
             <ChatProvider>
               {children}
-              <StatusBar style="auto" />
+              <StatusBar style="dark" />
             </ChatProvider>
           </AuthProvider>
         </SafeAreaProvider>

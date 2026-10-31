@@ -46,6 +46,7 @@ import {
 import { formatDayMonth, formatEventTime } from '@/utils/format';
 import { RequireSession } from '@/components/auth/require-session';
 import { ItemBodySkeleton } from '@/components/ui/skeletons';
+import { StatusBar } from 'expo-status-bar';
 import Animated from 'react-native-reanimated';
 import { StickyDetailHeader, useStickyScroll } from '@/components/navigation/sticky-detail-header';
 
@@ -82,7 +83,7 @@ function StockItemContent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { scrollY, onScroll } = useStickyScroll();
+  const { scrollY, onScroll, solid } = useStickyScroll(300);
   const queryClient = useQueryClient();
   const { session, getIdToken } = useAuth();
   const postGuard = usePenaltyGuard();
@@ -197,6 +198,8 @@ function StockItemContent() {
 
   return (
     <View className="flex-1 bg-white">
+      {/* Light text over the picture, dark once the bar is white. */}
+      <StatusBar style={solid ? 'dark' : 'light'} />
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
