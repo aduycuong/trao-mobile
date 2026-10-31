@@ -1,10 +1,11 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { UserAvatar } from '@/components/me/user-avatar';
 import { AppText } from '@/components/ui/app-text';
 import type { PublicReview, ReviewerRole, ReviewSummary } from '@/types/people';
 import { formatDayMonth } from '@/utils/format';
+import { FilterChip } from '@/components/ui/filter-chip';
 
 const STAR_PATH = 'M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z';
 
@@ -94,25 +95,15 @@ export function ReviewsHeader({ summary, role, onRole }: ReviewsHeaderProps) {
         </>
       ) : null}
 
-      <View accessibilityRole="tablist" className="flex-row gap-2">
-        {FILTERS.map((filter) => {
-          const on = filter.value === role;
-          return (
-            <Pressable
-              key={filter.label}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
-              onPress={() => onRole(filter.value)}
-              className={`h-[34px] justify-center rounded-full border-[1.5px] px-3 ${
-                on ? 'border-[#0F2440] bg-[#0F2440]' : 'border-[#D5DDE5] bg-white'
-              }`}
-            >
-              <AppText className={`text-[13px] font-vn-semibold ${on ? 'text-white' : ''}`}>
-                {filter.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
+      <View accessibilityRole="tablist" className="flex-row gap-2 pb-3.5">
+        {FILTERS.map((filter) => (
+          <FilterChip
+            key={filter.label}
+            label={filter.label}
+            on={filter.value === role}
+            onPress={() => onRole(filter.value)}
+          />
+        ))}
       </View>
     </View>
   );
