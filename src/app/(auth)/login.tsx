@@ -12,8 +12,8 @@ import {
 } from '@/components/auth/auth-ui';
 import { AppText } from '@/components/ui/app-text';
 import { useAuth } from '@/hooks/useAuth';
-import { openPolicies } from '@/utils/open-policies';
 import { validateLogin, type AuthFieldErrors } from '@/utils/auth-validation';
+import { PolicySheet } from '@/components/post/policy-sheet';
 
 const WRONG_CREDENTIALS = 'Email hoặc mật khẩu chưa đúng.';
 
@@ -25,6 +25,7 @@ export default function LoginScreen() {
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [policy, setPolicy] = useState<'terms' | 'privacy' | null>(null);
   const wrongCredentials = error === WRONG_CREDENTIALS;
 
   function close() {
@@ -108,16 +109,17 @@ export default function LoginScreen() {
         </View>
         <AppText className="text-center text-[12px] leading-[18px] text-[#5A6772]">
           Đăng nhập bằng Google hoặc Facebook nghĩa là bạn đồng ý với{' '}
-          <AppText className="text-[12px] text-[#1673D9]" onPress={openPolicies}>
+          <AppText className="text-[12px] text-[#1673D9]" onPress={() => setPolicy('terms')}>
             Điều khoản
           </AppText>{' '}
           và{' '}
-          <AppText className="text-[12px] text-[#1673D9]" onPress={openPolicies}>
+          <AppText className="text-[12px] text-[#1673D9]" onPress={() => setPolicy('privacy')}>
             Chính sách bảo mật
           </AppText>{' '}
           của Trao.
         </AppText>
       </AuthSheet>
+      {policy ? <PolicySheet slug={policy} onClose={() => setPolicy(null)} /> : null}
     </AuthScroll>
   );
 }

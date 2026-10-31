@@ -19,7 +19,7 @@ import {
   validateRegistration,
   type AuthFieldErrors,
 } from '@/utils/auth-validation';
-import { openPolicies } from '@/utils/open-policies';
+import { PolicySheet } from '@/components/post/policy-sheet';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -31,6 +31,7 @@ export default function RegisterScreen() {
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [policy, setPolicy] = useState<'terms' | 'privacy' | null>(null);
   const strength = getPasswordStrength(password);
 
   async function submit() {
@@ -145,14 +146,14 @@ export default function RegisterScreen() {
               Tôi đồng ý với{' '}
               <AppText
                 className="text-[13px] font-vn-semibold text-[#1673D9]"
-                onPress={openPolicies}
+                onPress={() => setPolicy('terms')}
               >
                 Điều khoản sử dụng
               </AppText>
               ,{' '}
               <AppText
                 className="text-[13px] font-vn-semibold text-[#1673D9]"
-                onPress={openPolicies}
+                onPress={() => setPolicy('privacy')}
               >
                 Chính sách bảo mật
               </AppText>{' '}
@@ -170,6 +171,7 @@ export default function RegisterScreen() {
           <TextLink label="Đăng nhập" onPress={() => router.replace('/login')} />
         </View>
       </AuthSheet>
+      {policy ? <PolicySheet slug={policy} onClose={() => setPolicy(null)} /> : null}
     </AuthScroll>
   );
 }
