@@ -232,6 +232,7 @@ function ItemFormBody({
     onSuccess: async (result, after) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['item', result.id] }),
       ]);
       if (item) {

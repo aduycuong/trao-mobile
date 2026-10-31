@@ -20,7 +20,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useItemMediaSignal } from '@/hooks/useItemMediaSignal';
-import { fetchMyItems, MY_ITEMS_QUERY_KEY } from '@/services/stock/items-api';
+import { fetchMyItems, MY_ITEMS_QUERY_KEY, MY_TAGS_QUERY_KEY } from '@/services/stock/items-api';
 import type { ItemListRow } from '@/types/stock';
 import { getAsyncStorage } from '@/utils/async-storage';
 import { StockRowsSkeleton, SkeletonGroup } from '@/components/ui/skeletons';
@@ -305,7 +305,10 @@ export default function StockTab() {
           onClose={() => setAddingTag(false)}
           onAdded={async () => {
             setAddingTag(false);
-            await queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY });
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY }),
+              queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY }),
+            ]);
           }}
         />
       ) : null}
