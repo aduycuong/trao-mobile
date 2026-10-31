@@ -238,7 +238,9 @@ function ItemFormBody({
         queryClient.invalidateQueries({ queryKey: ['item', result.id] }),
       ]);
       if (item) {
-        router.replace({ pathname: '/stock/[id]', params: { id: item.id } });
+        // Back to where the edit was opened from (the item page, or the post flow), not a new
+        // item page on top of it; the item page is the fallback when the edit was opened first.
+        onClose();
       } else if (postFlow && after === 'post') {
         router.replace({ pathname: '/stock/[id]/post', params: { id: result.id, from: 'new' } });
       } else if (postFlow) {
