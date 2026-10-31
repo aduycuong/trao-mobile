@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { TraoLogo } from '@/components/auth/trao-logo';
 import { AuthButton, SocialButtons, TextLink } from '@/components/auth/auth-ui';
 import { AppText } from '@/components/ui/app-text';
-import { openPolicies } from '@/utils/open-policies';
+import { PolicySheet } from '@/components/post/policy-sheet';
 
 const PERKS = [
   'Nhắn tin, trả giá, đổi, nhận đồ tặng',
@@ -18,6 +18,7 @@ const PERKS = [
 export default function AuthGateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [policy, setPolicy] = useState<'terms' | 'privacy' | null>(null);
 
   function close() {
     if (router.canGoBack()) router.back();
@@ -90,16 +91,17 @@ export default function AuthGateScreen() {
         </View>
         <AppText className="text-center text-[12px] leading-[18px] text-[#5A6772]">
           Tiếp tục nghĩa là bạn đồng ý với{' '}
-          <AppText className="text-[12px] text-[#1673D9]" onPress={openPolicies}>
+          <AppText className="text-[12px] text-[#1673D9]" onPress={() => setPolicy('terms')}>
             Điều khoản
           </AppText>{' '}
           và{' '}
-          <AppText className="text-[12px] text-[#1673D9]" onPress={openPolicies}>
+          <AppText className="text-[12px] text-[#1673D9]" onPress={() => setPolicy('privacy')}>
             Chính sách bảo mật
           </AppText>{' '}
           của Trao.
         </AppText>
       </View>
+      {policy ? <PolicySheet slug={policy} onClose={() => setPolicy(null)} /> : null}
     </View>
   );
 }
