@@ -40,13 +40,10 @@ export function SkeletonGroup({
   }, [opacity]);
 
   return (
-    <Animated.View
-      accessibilityLabel={label}
-      accessibilityRole="progressbar"
-      className={className}
-      style={{ opacity }}
-    >
-      {children}
+    // The classes go on a plain View: an Animated.View does not read `className`, which left the
+    // layout (rows, wrapping, padding) out of every group.
+    <Animated.View accessibilityLabel={label} accessibilityRole="progressbar" style={{ opacity }}>
+      <View className={className}>{children}</View>
     </Animated.View>
   );
 }
@@ -317,17 +314,34 @@ export function ListingBodySkeleton() {
   );
 }
 
-/** A grid of listing cards, two columns (a person's listings). */
-export function CardGridSkeleton({ count = 4 }: { count?: number }) {
+/**
+ * Rows of two listing cards, like the real list (10 between the columns, 20 between the rows).
+ * `className` is the padding around it; the default is the screen gutter, so pass `''` inside a
+ * container that already has one.
+ */
+export function CardGridSkeleton({
+  count = 4,
+  className = 'px-4',
+}: {
+  count?: number;
+  className?: string;
+}) {
+  const rows = Array.from({ length: Math.ceil(count / 2) }, (_, row) => row);
   return (
-    <SkeletonGroup className="flex-row flex-wrap gap-x-2.5 gap-y-5 px-4 pb-6 pt-3">
-      {Array.from({ length: count }, (_, index) => (
-        <View key={index} className="w-[48.5%] gap-2">
-          <SkeletonBlock className="aspect-[4/5] w-full rounded-2xl" />
-          <SkeletonBlock className="h-4 w-1/2" />
-          <SkeletonBlock className="h-4 w-4/5" />
-        </View>
-      ))}
+    <SkeletonGroup className={className}>
+      <View className="gap-y-5 pt-3">
+        {rows.map((row) => (
+          <View key={row} className="flex-row gap-x-2.5">
+            {[0, 1].map((column) => (
+              <View key={column} className="flex-1 gap-2">
+                <SkeletonBlock className="aspect-[4/5] w-full rounded-2xl" />
+                <SkeletonBlock className="h-4 w-1/2" />
+                <SkeletonBlock className="h-4 w-4/5" />
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
     </SkeletonGroup>
   );
 }

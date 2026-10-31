@@ -325,9 +325,11 @@ export default function ProfileScreen() {
     <View className="px-4 pb-6 pt-2">
       {active.isPending ? (
         tab === 'listings' ? (
-          <CardGridSkeleton />
+          <CardGridSkeleton className="" />
         ) : (
-          <ProfileReviewsSkeleton />
+          <View className="-mx-4">
+            <ProfileReviewsSkeleton />
+          </View>
         )
       ) : null}
       {active.error ? (
