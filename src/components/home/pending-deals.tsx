@@ -30,8 +30,9 @@ export function PendingDeals() {
   if (!session || items.length === 0) return null;
 
   return (
-    <View className="mx-4 mb-[22px] rounded-[20px] bg-[#F1F7FE] px-3.5 pb-1.5 pt-1">
-      <View className="flex-row items-center gap-2">
+    <View className="mx-4 mb-[22px] rounded-[20px] bg-[#F1F7FE] px-3.5 pb-2 pt-2">
+      {/* A header row as tall as the "Xem tất cả" link, so the title keeps its room either way. */}
+      <View className="min-h-11 flex-row items-center gap-2">
         <AppText accessibilityRole="header" className="flex-1 text-[15px] font-vn-bold">
           Chờ bạn chốt{' '}
           <AppText className="text-[15px] font-vn-medium text-[#5A6772]">{items.length}</AppText>
