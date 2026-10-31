@@ -5,8 +5,8 @@ import { RequireSession } from '@/components/auth/require-session';
 
 /** Chỉnh sửa an item of the Kho đồ (canvas Post, mode "edit"). */
 function EditItemContent() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  return <ItemForm itemId={id} />;
+  const { id, after } = useLocalSearchParams<{ id: string; after?: string }>();
+  return <ItemForm itemId={id} afterSave={after === 'listings' ? 'listings' : undefined} />;
 }
 
 export default function EditItemScreen() {

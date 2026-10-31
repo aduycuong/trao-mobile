@@ -57,6 +57,7 @@ import { planPicks } from '@/utils/media-rules';
 import { sameMedia, tilesOf, type Tile } from '@/utils/item-form';
 import { StackSkeleton } from '@/components/ui/skeletons';
 import { useBottomInset } from '@/hooks/useBottomInset';
+import { MY_LISTINGS_QUERY_KEY } from '@/services/listings/listings-api';
 
 const PLACEHOLDER =
   'Ví dụ: iPhone 13 128GB xanh, mua 2022, pin 89%, xước nhẹ cạnh dưới, kèm ốp và cáp. Mua dịp tốt nghiệp, giờ đổi máy nên bán lại.';
@@ -70,10 +71,12 @@ type ItemFormProps = {
   itemId?: string;
   /** `post`: Thêm đồ as step 1 of Đăng tin. */
   flow?: 'post';
+  /** `listings`: after saving an edit, go to Tin đăng (opened from the edit of a listing). */
+  afterSave?: 'listings';
 };
 
 /** Thêm đồ (/stock/new) and Chỉnh sửa (/stock/[id]/edit), canvas Post step "item". */
-export function ItemForm({ itemId, flow }: ItemFormProps) {
+export function ItemForm({ itemId, flow, afterSave }: ItemFormProps) {
   const { session, getIdToken } = useAuth();
   const goBack = useGoBack(itemId ? { pathname: '/stock/[id]', params: { id: itemId } } : '/stock');
   const insets = useSafeAreaInsets();
@@ -110,7 +113,12 @@ export function ItemForm({ itemId, flow }: ItemFormProps) {
     );
   }
   return (
-    <ItemFormBody item={item ?? null} postFlow={flow === 'post' && !itemId} onClose={goBack} />
+    <ItemFormBody
+      item={item ?? null}
+      postFlow={flow === 'post' && !itemId}
+      afterSave={afterSave}
+      onClose={goBack}
+    />
   );
 }
 
@@ -142,10 +150,12 @@ function FormBar({ title, onClose, step }: { title: string; onClose: () => void;
 function ItemFormBody({
   item,
   postFlow,
+  afterSave,
   onClose,
 }: {
   item: ItemDetail | null;
   postFlow: boolean;
+  afterSave?: 'listings';
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -235,12 +245,16 @@ function ItemFormBody({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: MY_ITEMS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: MY_TAGS_QUERY_KEY }),
+        // The listings of the item show its title and cover, and may go back for review.
+        queryClient.invalidateQueries({ queryKey: MY_LISTINGS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['item', result.id] }),
       ]);
       if (item) {
         // Back to where the edit was opened from (the item page, or the post flow), not a new
         // item page on top of it; the item page is the fallback when the edit was opened first.
-        onClose();
+        // From the edit of a listing the person only wanted the item changed: go to Tin đăng.
+        if (afterSave === 'listings') router.dismissTo('/listings');
+        else onClose();
       } else if (postFlow && after === 'post') {
         router.replace({ pathname: '/stock/[id]/post', params: { id: result.id, from: 'new' } });
       } else if (postFlow) {

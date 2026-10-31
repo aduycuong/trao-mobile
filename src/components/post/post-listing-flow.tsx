@@ -580,7 +580,13 @@ export function PostListingFlow({
           </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/stock/[id]/edit', params: { id: item.id } })}
+            onPress={() =>
+              router.push({
+                pathname: '/stock/[id]/edit',
+                // Editing a listing only to change the item: after saving it, land on Tin đăng.
+                params: { id: item.id, ...(from === 'edit' ? { after: 'listings' } : {}) },
+              })
+            }
             className="h-[34px] justify-center rounded-[10px] bg-white px-3"
           >
             <AppText className="text-[13px] font-vn-bold text-[#1673D9]">Sửa</AppText>
